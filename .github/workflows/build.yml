@@ -96,14 +96,10 @@ jobs:
         fi
         
         bash $(pwd)/build_kernel.sh
-        
-        if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
-		KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
-		KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
-        else
-        	KSU_VERSION="No KernelSU"
+        if [[ ${{ github.event.inputs.KSU }} = "true" ]]; then
+        	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
+        	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
         fi
-        
         echo "- KernelSU version: $KSU_VERSION"
         
         ## CREATE buildDetails.txt
