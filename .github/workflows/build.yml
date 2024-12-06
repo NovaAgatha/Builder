@@ -97,11 +97,20 @@ jobs:
         
         bash $(pwd)/build_kernel.sh
         
+        if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
+		KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
+		KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
+        else
+        	KSU_VERSION="No KernelSU"
+        fi
+        
+        echo "- KernelSU version: $KSU_VERSION"
+        
         ## CREATE buildDetails.txt
         printf "Localversion: `./getutsrel`
         Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
         Defconfig: `echo $DEFCONFIG`
-        KernelSU: `cat tmp_ksuver`
+        KernelSU: `echo $KSU_VERSION`
         Build start: `echo $BUILD_START`
         " >> buildDetails.txt
         
