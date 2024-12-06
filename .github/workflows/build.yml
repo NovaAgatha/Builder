@@ -72,6 +72,7 @@ jobs:
 
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
+        export BUILD_START=`date`
         export IS_CI=true
         export DEVICE=A055X
 
