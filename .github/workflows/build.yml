@@ -16,10 +16,14 @@ on:
       KSU:
         description: Add KernelSU support
         type: boolean
+      UPLOAD_TO_TG:
+        description: Upload to Telegram
+        type: boolean
         
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: telegramUpload
     steps:
     - uses: actions/checkout@v4
       with:
@@ -67,7 +71,8 @@ jobs:
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
 
         export KBUILD_BUILD_USER="rsuntk"
-        export KBUILD_BUILD_HOST="rsuntk_orgs"
+        export KBUILD_BUILD_HOST="rsuntkOrgs"
+        export IS_CI=true
         export DEVICE=A055X
 
         # do some checks
@@ -90,6 +95,15 @@ jobs:
         fi
         
         bash $(pwd)/build_kernel.sh
+        
+        ## CREATE buildDetails.txt
+        printf "Localversion: `./getutsrel`
+        Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
+        Defconfig: `echo $DEFCONFIG`
+        KernelSU: `cat tmp_ksuver`
+        Build start: `echo $BUILD_START`
+        " >> buildDetails.txt
+        
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
@@ -119,3 +133,16 @@ jobs:
         name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
         path: android_kernel_samsung_a05/AnyKernel3/*
         compression-level: 9
+        
+    - name: Upload to Telegram
+      if: github.event.inputs.UPLOAD_TO_TG == 'true'
+      env:
+        CHAT_ID: ${{ secrets.CHAT_ID_A05 }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        TITLE: "Galaxy A05 Kernel"
+      run: |
+        if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
+          ZIP=$(find `pwd` -name "*.zip")
+          bash $GITHUB_WORKSPACE/scripts/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
+        fi
+      working-directory: android_kernel_samsung_a05
