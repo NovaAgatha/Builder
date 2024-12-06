@@ -143,6 +143,6 @@ jobs:
       run: |
         if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
           ZIP=$(find `pwd` -name "*.zip")
-          bash $GITHUB_WORKSPACE/scripts/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
+          bash $(pwd)/scripts/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
         fi
       working-directory: android_kernel_samsung_a05
