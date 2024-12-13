@@ -75,6 +75,7 @@ jobs:
         export BUILD_START=`date`
         export IS_CI=true
         export DEVICE=A055X
+        export KERNELSU="${{ github.event.inputs.KSU }}"
 
         # do some checks
         echo ""
