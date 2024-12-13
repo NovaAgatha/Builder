@@ -91,10 +91,6 @@ jobs:
         echo ====================================================
         echo ""
         
-        if [[ ${{ github.event.inputs.KSU }} = "true" ]]; then
-        	curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
-        fi
-        
         bash $(pwd)/build_kernel.sh
         if [[ ${{ github.event.inputs.KSU }} = "true" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
