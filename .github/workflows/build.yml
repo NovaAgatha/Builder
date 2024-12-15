@@ -6,12 +6,21 @@ on:
         description: Defconfig
         default: 'rsuntk_defconfig'
         required: true
+      LTO:
+        description: 'Link Time Optimisation'
+        required: true
+        default: 'none'
+        type: choice
+        options:
+          - none
+          - thin
+          - full
       BRANCH:
         description: Branch
         default: ''
         required: true
-      CLANG_EIGHTEEN:
-        description: Use clang 18
+      CLANG_SIXTEEN:
+        description: Use clang 16
         type: boolean
       KSU:
         description: Add KernelSU support
@@ -43,12 +52,12 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        if [[ ${{ github.event.inputs.CLANG_EIGHTEEN }} != "true" ]]; then
+        if [[ ${{ github.event.inputs.CLANG_SIXTEEN }} != "true" ]]; then
           git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
         else
-          mkdir clang-18 && cd clang-18
-          wget -q -O clang18.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r522817.tar.gz
-          tar -xf clang18.tar.gz && rm clang18.tar.gz && cd ..
+          mkdir clang-16 && cd clang-16
+          wget -q -O clang16.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz
+          tar -xf clang16.tar.gz && rm clang16.tar.gz && cd ..
         fi
         git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
       working-directory: android_kernel_samsung_a05
@@ -61,10 +70,10 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        if [[ "${{ github.event.inputs.CLANG_EIGHTEEN }}" != "true" ]]; then
+        if [[ "${{ github.event.inputs.CLANG_SIXTEEN }}" != "true" ]]; then
           export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
         else
-          export PATH=$(pwd)/toolchains/clang-18/bin:$PATH
+          export PATH=$(pwd)/toolchains/clang-16/bin:$PATH
         fi
         export CROSS_COMPILE=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
@@ -76,6 +85,7 @@ jobs:
         export IS_CI=true
         export DEVICE=A055X
         export KERNELSU="${{ github.event.inputs.KSU }}"
+        export LTO="${{ github.event.inputs.LTO }}"
 
         # do some checks
         echo ""
@@ -89,6 +99,7 @@ jobs:
         echo CURRENT_DIR=$(pwd)
         echo DATE=`date`
         echo KERNELSU="${{ github.event.inputs.KSU }}"
+        echo LTO="${{ github.event.inputs.LTO }}"
         echo ====================================================
         echo ""
         
