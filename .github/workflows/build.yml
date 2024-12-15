@@ -75,6 +75,10 @@ jobs:
         else
           export PATH=$(pwd)/toolchains/clang-16/bin:$PATH
         fi
+
+        # stub, we'll edit it later
+        export SELINUX="Enforcing"
+        
         export CROSS_COMPILE=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
@@ -113,9 +117,11 @@ jobs:
         ## CREATE buildDetails.txt
         printf "Localversion: `./getutsrel`
         Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
+        Build: `date +'%d %B %Y @ %m:%M'`
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
-        Build start: `echo $BUILD_START`
+        LTO: `echo $LTO`
+        SELinux: `echo $SELINUX`
         " >> buildDetails.txt
         
         echo ""
