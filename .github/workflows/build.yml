@@ -2,9 +2,9 @@ name: Build Kernel
 on:
   workflow_dispatch:
     inputs:
-      DEFCONFIG:
-        description: Defconfig
-        default: 'rsuntk_defconfig'
+      BRANCH:
+        description: Kernel branch
+        default: 'android-4.19-stable'
         required: true
       LTO:
         description: 'Link Time Optimisation'
@@ -15,13 +15,6 @@ on:
           - none
           - thin
           - full
-      BRANCH:
-        description: Branch
-        default: ''
-        required: true
-      CLANG_SIXTEEN:
-        description: Use clang 16
-        type: boolean
       KSU:
         description: Add KernelSU support
         type: boolean
@@ -36,9 +29,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: rsuntkOrgs/android_kernel_samsung_a05
+        path: kernel_root
+        repository: "rsuntkOrgs/android_kernel_samsung_a05"
         ref: ${{ github.event.inputs.BRANCH }}
-        path: android_kernel_samsung_a05
         show-progress: false
         fetch-depth: 1
         
@@ -52,16 +45,11 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        if [[ ${{ github.event.inputs.CLANG_SIXTEEN }} != "true" ]]; then
-          git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
-        else
-          mkdir clang-16 && cd clang-16
-          wget -q -O clang16.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz
-          tar -xf clang16.tar.gz && rm clang16.tar.gz && cd ..
-        fi
+        mkdir clang-16 && cd clang-16
+        wget -q -O clang16.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz
+        tar -xf clang16.tar.gz && rm clang16.tar.gz && cd ..
         git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
-      working-directory: android_kernel_samsung_a05
-
+      working-directory: kernel_root
     - name: Prepare timezone fix
       run: |
         sudo rm /etc/localtime
@@ -70,99 +58,121 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        if [[ "${{ github.event.inputs.CLANG_SIXTEEN }}" != "true" ]]; then
-          export PATH=$(pwd)/toolchains/clang-11/bin:$PATH
-        else
-          export PATH=$(pwd)/toolchains/clang-16/bin:$PATH
-        fi
-
-        # stub, we'll edit it later
-        export SELINUX="Enforcing"
+        CLANG_VERSION=16
         
+        export PATH=$(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin:$PATH
         export CROSS_COMPILE=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
-        export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
 
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
-        export BUILD_START=`date`
+        export BUILD_START=`date +'%d %B %Y @ %m:%M'`
+        export SELINUX_STATE="Enforcing"
         export IS_CI=true
-        export DEVICE=A055X
-        export KERNELSU="${{ github.event.inputs.KSU }}"
         export LTO="${{ github.event.inputs.LTO }}"
+        export LLVM=1
+        export LLVM_IAS=1
 
-        # do some checks
-        echo ""
-        echo ====================================================
-        echo CROSS_COMPILE=$CROSS_COMPILE
-        echo DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        echo CLANG="`clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`"
-        echo CLANG_TRIPLE=$CLANG_TRIPLE
-        echo KBUILD_BUILD_USER=$KBUILD_BUILD_USER
-        echo KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
-        echo CURRENT_DIR=$(pwd)
-        echo DATE=`date`
-        echo KERNELSU="${{ github.event.inputs.KSU }}"
-        echo LTO="${{ github.event.inputs.LTO }}"
-        echo ====================================================
-        echo ""
+        # clone mtk connectivity
+        #rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
+
+        export DEFCONFIG="rsuntk_defconfig"
+        export DEVICE="A055F"
+        export DEVICE_ID="A05"
+        export TARGET_PRODUCT=a05
         
-        bash $(pwd)/build_kernel.sh
-        if [[ ${{ github.event.inputs.KSU }} = "true" ]]; then
+        export KERNELSU="${{ github.event.inputs.KSU }}"
+        
+        bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
+        
+        if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
         	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
+        else
+        	KSU_VERSION="No KernelSU"
         fi
         echo "- KernelSU version: $KSU_VERSION"
         
         ## CREATE buildDetails.txt
         printf "Localversion: `./getutsrel`
         Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
-        Build: `date +'%d %B %Y @ %m:%M'`
+        Build: `echo $BUILD_START`
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
         LTO: `echo $LTO`
-        SELinux: `echo $SELINUX`
+        SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
+        
+        echo "TITLE=Galaxy `echo $DEVICE_ID` Kernel" >> $GITHUB_ENV
         
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
         echo "===================================================="
+
         mv out/.config out/build_config.txt
         gitsha1=$(git rev-parse --short HEAD)
         buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
-      working-directory: android_kernel_samsung_a05
+      working-directory: kernel_root
       
     - name: Upload config
       uses: actions/upload-artifact@v4
       with:
         name: Config-${{ steps.buildKernel.outputs.buildDetails }}
-        path: android_kernel_samsung_a05/out/build_config.txt
+        path: kernel_root/out/build_config.txt
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Build-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
-          android_kernel_samsung_a05/out/arch/arm64/boot/*.gz
-          android_kernel_samsung_a05/out/arch/arm64/boot/dts/mediatek/*.dtb
+          kernel_root/out/arch/arm64/boot/*.gz
+          kernel_root/out/arch/arm64/boot/dts/mediatek/*.dtb
 
     - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
         name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
-        path: android_kernel_samsung_a05/AnyKernel3/*
+        path: kernel_root/AnyKernel3/*
         compression-level: 9
         
     - name: Upload to Telegram
       if: github.event.inputs.UPLOAD_TO_TG == 'true'
       env:
-        CHAT_ID: ${{ secrets.CHAT_ID_A05 }}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        TITLE: "Galaxy A05 Kernel"
       run: |
         if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
           ZIP=$(find `pwd` -name "*.zip")
           bash $(pwd)/scripts/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
         fi
-      working-directory: android_kernel_samsung_a05
+      working-directory: kernel_root
+        
+    - name: Strip LKMs
+      run: |
+        CLANG_VERSION=16
+        
+        # Cleanup zip
+        rm -rf *.zip
+
+        # Create folder
+        mkdir ../kernel_object_tmp
+        mkdir kernel_object
+
+        # Only move neccessary path!
+        find $(pwd) -type f -name "*.ko" -exec mv {} ../kernel_object_tmp \;
+        LIST=$(find ../kernel_object_tmp -type f -name "*.ko")
+
+        # Start stripping
+        for file in $LIST; do
+          echo -e "- Stripping `basename $file`"
+          $(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin/llvm-strip "$file" --strip-unneeded
+        done
+        mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
+      working-directory: kernel_root
+        
+    - name: Upload LKM
+      uses: actions/upload-artifact@v4
+      with:
+        name: LKM-${{ steps.buildKernel.outputs.buildDetails }}
+        path: kernel_root/kernel_object/*
