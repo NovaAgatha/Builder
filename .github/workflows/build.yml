@@ -19,6 +19,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: uploadTelegram
     steps:
     - uses: actions/checkout@v4
       with:
