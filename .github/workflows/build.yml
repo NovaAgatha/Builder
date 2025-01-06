@@ -27,6 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: telegramUpload
     steps:
+    - name: Get date
+      id: rundate
+      run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
     - uses: actions/checkout@v4
       with:
         path: kernel_root
@@ -34,6 +37,20 @@ jobs:
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
+        
+    - name: Telegram msg
+      uses: cbrgm/telegram-github-action@v1
+      with:
+        to: ${{ secrets.CHAT_ID_A05 }}
+        token: ${{ secrets.BOT_TOKEN }}
+        disable-web-page-preview: true
+        message: |
+          @${{ github.actor }} triggered a kernel build!
+          Start: ${{ steps.rundate.outputs.REPO_DATE }}
+          Device: a05m
+          Branch: ${{ github.event.inputs.BRANCH }}
+          Workflows: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          Repository: https://github.com/rsuntkOrgs/android_kernel_samsung_a05
         
     - name: Prepare dependencies
       run: |
