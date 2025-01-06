@@ -67,10 +67,6 @@ jobs:
         tar -xf clang16.tar.gz && rm clang16.tar.gz && cd ..
         git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
       working-directory: kernel_root
-    - name: Prepare timezone fix
-      run: |
-        sudo rm /etc/localtime
-        sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
       
     - name: Build kernel
       id: buildKernel
