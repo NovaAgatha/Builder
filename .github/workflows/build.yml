@@ -44,6 +44,7 @@ jobs:
         to: ${{ secrets.CHAT_ID_A05 }}
         token: ${{ secrets.BOT_TOKEN }}
         disable-web-page-preview: true
+        parse-mode: html
         message: |
           @${{ github.actor }} triggered a kernel build!
           Start: ${{ steps.rundate.outputs.REPO_DATE }}
