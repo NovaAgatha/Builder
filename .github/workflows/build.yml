@@ -87,14 +87,14 @@ jobs:
         else
           git clone --depth=1 https://github.com/rsuntk/toolchains.git -b clang-12 clang
         fi
-        git clone --depth=1 https://github.com/rsuntk/toolchains.git -b gcc-10 gcc-10
+        git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git android
       working-directory: kernel_root
       
     - name: Build kernel
       id: buildKernel
       run: |
         export PATH=$(pwd)/toolchains/clang/bin:$PATH
-        export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
+        export CROSS_COMPILE=$(pwd)/toolchains/android/bin/aarch64-linux-android-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
