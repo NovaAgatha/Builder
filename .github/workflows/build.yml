@@ -6,6 +6,10 @@ on:
         description: Kernel branch
         default: 'android-4.19-stable'
         required: true
+      DEFCONFIG:
+        description: Defconfig
+        default: 'rsuntk_defconfig'
+        required: true
       LTO:
         description: 'Link Time Optimisation'
         required: true
@@ -47,11 +51,11 @@ jobs:
         parse-mode: html
         message: |
           @${{ github.actor }} triggered a kernel build!
-          Start: ${{ steps.rundate.outputs.REPO_DATE }}
-          Device: a05m
-          Branch: ${{ github.event.inputs.BRANCH }}
-          Workflows: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          Repository: https://github.com/rsuntkOrgs/android_kernel_samsung_a05
+          <b>Start:</b> ${{ steps.rundate.outputs.REPO_DATE }}
+          <b>Device:</b> a05m
+          <b>Branch:</b> ${{ github.event.inputs.BRANCH }}
+          <b>Workflows:</b> ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          <b>Repository:</b> https://github.com/rsuntkOrgs/android_kernel_samsung_a05
         
     - name: Prepare dependencies
       run: |
@@ -90,7 +94,7 @@ jobs:
         # clone mtk connectivity
         #rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
 
-        export DEFCONFIG="rsuntk_defconfig"
+        export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export DEVICE="A055F"
         export DEVICE_ID="A05"
         export TARGET_PRODUCT=a05
@@ -153,12 +157,13 @@ jobs:
     - name: Upload to Telegram
       if: github.event.inputs.UPLOAD_TO_TG == 'true'
       env:
-        CHAT_ID: ${{ secrets.CHAT_ID_A05 }}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       run: |
         if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
           ZIP=$(find `pwd` -name "*.zip")
-          bash $(pwd)/scripts/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
+          git clone https://github.com/rsuntk/rsuntkBotScript.git --depth=1 i && cp ./i/* . && rm -rf i
+          bash $(pwd)/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
         fi
       working-directory: kernel_root
         
