@@ -92,7 +92,7 @@ jobs:
         export LLVM_IAS=1
 
         # clone mtk connectivity
-        #rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
+        rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
 
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export DEVICE="A055F"
@@ -157,7 +157,7 @@ jobs:
     - name: Upload to Telegram
       if: github.event.inputs.UPLOAD_TO_TG == 'true'
       env:
-        CHAT_ID: ${{ secrets.CHAT_ID }}
+        CHAT_ID: ${{ secrets.CHAT_ID_A05 }}
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       run: |
         if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
