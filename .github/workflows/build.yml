@@ -6,14 +6,6 @@ on:
         description: Kernel branch
         default: 'fourteen'
         required: true
-      TARGET_DEVICE:
-        description: 'Target Device'
-        required: true
-        default: 'a04s'
-        type: choice
-        options:
-          - a04s
-          - a13
       LTO:
         description: 'Link Time Optimisation'
         required: true
@@ -50,7 +42,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: kernel_root
-        repository: rsuntkOrgs/android_kernel_samsung_exynos850-198
+        repository: rsuntkOrgs/android_kernel_samsung_a13x
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
@@ -110,16 +102,9 @@ jobs:
           fi
         fi
         
-        if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a04s" ]]; then
-          export DEFCONFIG="rsuntk-a04sxx_defconfig"
-          export DEVICE="A047F"
-          export DEVICE_ID="A04s"
-        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a13" ]]; then
-          export DEFCONFIG="rsuntk-a13xx_defconfig"
-          export DEVICE="A135F"
-          export DEVICE_ID="A13"
-        fi
-        
+        export DEFCONFIG="rsuntk-a13xx_defconfig"
+        export DEVICE="A135F"
+        export DEVICE_ID="A13"
         export KERNELSU="${{ github.event.inputs.KSU }}"
         
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
