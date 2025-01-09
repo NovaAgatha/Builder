@@ -57,7 +57,7 @@ jobs:
           @${{ github.actor }} triggered a kernel build!
 
           Start: ${{ steps.rundate.outputs.REPO_DATE }}
-          Device: ${{ github.event.inputs.TARGET_DEVICE }}
+          Device: a13x
           Branch: ${{ github.event.inputs.BRANCH }}
           Workflows: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           Repository: ${{ github.server_url }}/${{ github.repository }}
@@ -102,7 +102,7 @@ jobs:
           fi
         fi
         
-        export DEFCONFIG="rsuntk-a13xx_defconfig"
+        export DEFCONFIG="rsuntk_defconfig"
         export DEVICE="A135F"
         export DEVICE_ID="A13"
         export KERNELSU="${{ github.event.inputs.KSU }}"
