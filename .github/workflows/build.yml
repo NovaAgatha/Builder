@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'T_UD'
+        default: 'fourteen'
         required: true
       DEFCONFIG:
         description: Defconfig
@@ -27,7 +27,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: rsuntkOrgs/android_kernel_samsung_a12s
+        repository: rsuntkOrgs/android_kernel_samsung_a23xq
         path: kernel_root
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
@@ -44,7 +44,7 @@ jobs:
         mkdir toolchains
         cd toolchains
         git clone --depth=1 https://github.com/rsuntk/toolchains.git -b clang-12 clang-12
-        git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
+        git clone --depth=1 https://gitlab.com/rsuntk/toolchains.git -b androidcc-4.9 google
       working-directory: kernel_root
     - name: Prepare timezone fix
       run: |
@@ -63,35 +63,19 @@ jobs:
         export BUILD_START=`date`
         export IS_CI=true
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        export DEVICE="A127F"
-        export DEVICE_ID="A12s"
-
-        if [[ "$DEFCONFIG" != "rsuntk-susfs_defconfig" ]]; then
-          export KERNELSU="${{ github.event.inputs.KSU }}"
-        fi
-
-        if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
-          cd security && rm -rf selinux
-          git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux
-          rm -rf selinux/.git && cd ..
-          echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
-          SELINUX_STATE="Permissive"
-        else
-          SELINUX_STATE="Enforcing"
-        fi
+        export DEVICE="A236E"
+        export DEVICE_ID="A23 5G"
+        export KERNELSU="${{ github.event.inputs.KSU }}"
+        export LLVM=1
+        export LLVM_IAS=1
         
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
         	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
-          SUSFS_VERSION="-1"
-        elif [[ "$DEFCONFIG" = "rsuntk-susfs_defconfig" ]]; then
-          KSU_VERSION="v1.0.2-40-legacy"
-          SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
         else	
           KSU_VERSION="No KernelSU"
-          SUSFS_VERSION="-1"
         fi
         echo "- KernelSU version: $KSU_VERSION"
         
@@ -130,8 +114,8 @@ jobs:
         name: Build-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
           kernel_root/out/arch/arm64/boot/*.gz
-          kernel_root/out/arch/arm64/boot/dts/exynos/*.dtb
-          kernel_root/out/arch/arm64/boot/dts/samsung/*.dtb
+#          kernel_root/out/arch/arm64/boot/dts/exynos/*.dtb
+#          kernel_root/out/arch/arm64/boot/dts/samsung/*.dtb
 
     - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
