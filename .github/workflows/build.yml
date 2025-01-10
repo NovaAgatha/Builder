@@ -6,6 +6,10 @@ on:
         description: Kernel branch
         default: 'T_UD'
         required: true
+      DEFCONFIG:
+        description: Defconfig
+        default: 'rsuntk_defconfig
+        required: true
       KSU:
         description: Add KernelSU support
         type: boolean
@@ -58,10 +62,13 @@ jobs:
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date`
         export IS_CI=true
-        export DEFCONFIG="rsuntk_defconfig"
+        export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export DEVICE="A127F"
         export DEVICE_ID="A12s"
-        export KERNELSU="${{ github.event.inputs.KSU }}"
+
+        if [[ "$DEFCONFIG" != "rsuntk-susfs_defconfig" ]]; then
+          export KERNELSU="${{ github.event.inputs.KSU }}"
+        fi
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           cd security && rm -rf selinux
