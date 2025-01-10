@@ -13,17 +13,11 @@ on:
       KSU:
         description: Add KernelSU support
         type: boolean
-      UPLOAD_TO_TG:
-        description: Upload to Telegram
-        type: boolean
-      SELINUX_PERMISSIVE:
-        description: Permissive SELinux
-        type: boolean
         
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: telegramUpload
+#    environment: telegramUpload
     steps:
     - uses: actions/checkout@v4
       with:
@@ -44,7 +38,7 @@ jobs:
         mkdir toolchains
         cd toolchains
         git clone --depth=1 https://github.com/rsuntk/toolchains.git -b clang-12 clang-12
-        git clone --depth=1 https://gitlab.com/rsuntk/toolchains.git -b androidcc-4.9 google
+        git clone --depth=1 https://github.com/rsuntk/toolchains.git -b androidcc-4.9 google
       working-directory: kernel_root
     - name: Prepare timezone fix
       run: |
@@ -79,19 +73,6 @@ jobs:
         fi
         echo "- KernelSU version: $KSU_VERSION"
         
-        ## CREATE buildDetails.txt
-        printf "Localversion: `./getutsrel`
-        Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
-        Build: `echo $BUILD_START`
-        Defconfig: `echo $DEFCONFIG`
-        KernelSU: `echo $KSU_VERSION`
-        SusFS: `echo $SUSFS_VERSION`
-        LTO: `echo $LTO`
-        SELinux: `echo $SELINUX_STATE`
-        " >> buildDetails.txt
-        
-        echo "TITLE=Galaxy `echo $DEVICE_ID` Kernel" >> $GITHUB_ENV
-        
         echo ""
         echo "===================================================="
         strings out/arch/arm64/boot/Image | grep "Linux version"
@@ -123,18 +104,6 @@ jobs:
         name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
         path: kernel_root/AnyKernel3/*
         compression-level: 9
-        
-    - name: Upload to Telegram
-      if: github.event.inputs.UPLOAD_TO_TG == 'true'
-      env:
-        CHAT_ID: ${{ secrets.CHAT_ID }}
-        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-      run: |
-        if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
-          ZIP=$(find `pwd` -name "*.zip")
-          bash $(pwd)/scripts/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
-        fi
-      working-directory: kernel_root
       
     - name: Check need LKM stripping
       id: need_strip
