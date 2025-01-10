@@ -85,8 +85,13 @@ jobs:
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
         	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
-        else
-        	KSU_VERSION="No KernelSU"
+          SUSFS_VERSION="-1"
+        elif [[ "$DEFCONFIG" = "rsuntk-susfs_defconfig" ]]; then
+          KSU_VERSION="v1.0.2-40-legacy"
+          SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
+        else	
+          KSU_VERSION="No KernelSU"
+          SUSFS_VERSION="-1"
         fi
         echo "- KernelSU version: $KSU_VERSION"
         
@@ -96,6 +101,7 @@ jobs:
         Build: `echo $BUILD_START`
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
+        SusFS: `echo $SUSFS_VERSION`
         LTO: `echo $LTO`
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
