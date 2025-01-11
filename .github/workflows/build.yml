@@ -68,9 +68,9 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        echo "[+] Cloning Android clang 20"
-        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
-        # URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz"
+        echo "[+] Cloning Android clang 16"
+        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
+        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz"
         
         mkdir clang && cd clang
         wget -q -O clang.tar.gz $URL 
