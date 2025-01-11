@@ -30,7 +30,7 @@ on:
       LLVM_IAS:
         description: LLVM_IAS=1 (LLVM=1 needed!)
         type: boolean
-      PERMISSIVE:
+      SELINUX_PERMISSIVE:
         description: Permissive SELinux
         type: boolean
         
