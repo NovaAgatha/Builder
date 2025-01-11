@@ -85,7 +85,7 @@ jobs:
           git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
           echo "GNU_PATH=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-" >> $GITHUB_ENV
         else
-          echo "GNU_PATH="$(pwd)/toolchains/clang/aarch64-linux-gnu/bin/" >> $GITHUB_ENV
+          echo "GNU_PATH=$(pwd)/toolchains/clang/aarch64-linux-gnu/bin/" >> $GITHUB_ENV
         fi
       working-directory: kernel_root
       
