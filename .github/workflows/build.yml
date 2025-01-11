@@ -25,6 +25,9 @@ on:
       UPLOAD_TO_TG:
         description: Upload to Telegram
         type: boolean
+      ZYCLANG:
+        description: Use ZYClang 20
+        type: boolean
         
 jobs:
   build:
@@ -67,19 +70,30 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        mkdir clang-16 && cd clang-16
-        wget -q -O clang16.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz
-        tar -xf clang16.tar.gz && rm clang16.tar.gz && cd ..
-        git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
+        if [[ "${{ github.event.inputs.ZYCLANG }}" = "true" ]]; then
+          URL="https://github.com/ZyCromerZ/Clang/releases/download/20.0.0git-20250111-release/Clang-20.0.0git-20250111.tar.gz"
+        else
+          URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
+        fi
+        # URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz"
+        
+        mkdir clang && cd clang
+        wget -q -O clang.tar.gz $URL 
+        tar -xf clang.tar.gz && rm clang.tar.gz && cd ..
+        
+        if [[ "${{ github.event.inputs.ZYCLANG }}" != "true" ]]; then
+          git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
+          echo "GNU_PATH=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-" >> $GITHUB_ENV
+        else
+          echo "GNU_PATH="$(pwd)/toolchains/clang/aarch64-linux-gnu/bin/" >> $GITHUB_ENV
+        fi
       working-directory: kernel_root
       
     - name: Build kernel
       id: buildKernel
       run: |
-        CLANG_VERSION=16
-        
-        export PATH=$(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin:$PATH
-        export CROSS_COMPILE=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-
+        export PATH=$(pwd)/toolchains/clang/bin:$PATH
+        export CROSS_COMPILE="$GNU_PATH"
         export CLANG_TRIPLE=aarch64-linux-gnu-
 
         export KBUILD_BUILD_USER="rsuntk"
@@ -169,8 +183,6 @@ jobs:
         
     - name: Strip LKMs
       run: |
-        CLANG_VERSION=16
-        
         # Cleanup zip
         rm -rf *.zip
 
@@ -185,7 +197,7 @@ jobs:
         # Start stripping
         for file in $LIST; do
           echo -e "- Stripping `basename $file`"
-          $(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin/llvm-strip "$file" --strip-unneeded
+          $(pwd)/toolchains/clang/bin/llvm-strip "$file" --strip-unneeded
         done
         mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
       working-directory: kernel_root
