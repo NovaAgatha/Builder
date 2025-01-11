@@ -72,16 +72,17 @@ jobs:
         mkdir toolchains
         cd toolchains
         if [[ "${{ github.event.inputs.ZYCLANG }}" = "true" ]]; then
+          echo "[+] Cloning ZYClang"
           URL="https://github.com/ZyCromerZ/Clang/releases/download/20.0.0git-20250111-release/Clang-20.0.0git-20250111.tar.gz"
         else
+          echo "[+] Cloning Android clang"
           URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
         fi
         # URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz"
         
         mkdir clang && cd clang
         wget -q -O clang.tar.gz $URL 
-        tar -xf clang.tar.gz && rm clang.tar.gz && cd ..
-        
+        tar -xf clang.tar.gz && rm clang.tar.gz && cd ../..
         if [[ "${{ github.event.inputs.ZYCLANG }}" != "true" ]]; then
           git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
           echo "GNU_PATH=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-" >> $GITHUB_ENV
@@ -94,7 +95,7 @@ jobs:
       id: buildKernel
       run: |
         export PATH=$(pwd)/toolchains/clang/bin:$PATH
-        export CROSS_COMPILE="$GNU_PATH"
+        export CROSS_COMPILE="`echo $GNU_PATH`"
         export CLANG_TRIPLE=aarch64-linux-gnu-
 
         export KBUILD_BUILD_USER="rsuntk"
