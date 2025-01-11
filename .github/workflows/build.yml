@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'android-4.19-stable'
+        default: 'staging/U7'
         required: true
       DEFCONFIG:
         description: Defconfig
