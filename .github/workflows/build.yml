@@ -46,6 +46,7 @@ jobs:
         fetch-depth: 1
         
     - name: Telegram msg
+      if: github.event.inputs.UPLOAD_TO_TG == 'true'
       uses: cbrgm/telegram-github-action@v1
       with:
         to: ${{ secrets.CHAT_ID_A05 }}
