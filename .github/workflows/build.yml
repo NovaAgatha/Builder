@@ -96,6 +96,10 @@ jobs:
         export BUILD_START=`date`
         export IS_CI=true
         export LTO="${{ github.event.inputs.LTO }}"
+        export DEFCONFIG="rsuntk_defconfig"
+        export DEVICE="A135F"
+        export DEVICE_ID="A13"
+        export KERNELSU="${{ github.event.inputs.KSU }}"
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           cd security && rm -rf selinux
@@ -113,11 +117,6 @@ jobs:
             export LLVM_IAS=1
           fi
         fi
-        
-        export DEFCONFIG="rsuntk_defconfig"
-        export DEVICE="A135F"
-        export DEVICE_ID="A13"
-        export KERNELSU="${{ github.event.inputs.KSU }}"
         
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
