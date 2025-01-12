@@ -6,10 +6,16 @@ on:
         description: Kernel branch
         default: 'T_UD'
         required: true
-      DEFCONFIG:
-        description: Defconfig
-        default: 'rsuntk_defconfig'
+      TARGET_DEVICE:
+        description: 'Device'
         required: true
+        default: 'a12s'
+        type: choice
+        options:
+          - a12s
+          - a12s_susfs
+          - m12
+          - m12_susfs
       KSU:
         description: Add KernelSU support
         type: boolean
@@ -27,7 +33,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: rsuntkOrgs/android_kernel_samsung_a12s
+        repository: rsuntkOrgs/android_kernel_samsung_exynos850-111
         path: kernel_root
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
@@ -62,12 +68,25 @@ jobs:
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date`
         export IS_CI=true
-        export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        export DEVICE="A127F"
-        export DEVICE_ID="A12s"
 
-        if [[ "$DEFCONFIG" != "rsuntk-susfs_defconfig" ]]; then
+        if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s" ]]; then
+          export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
+          export DEVICE="A127F"
+          export DEVICE_ID="A12s"
           export KERNELSU="${{ github.event.inputs.KSU }}"
+        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s_susfs" ]]; then
+          export DEFCONFIG="rsuntk-a12s-susfs_defconfig"
+          export DEVICE="A127F"
+          export DEVICE_ID="A12s"
+        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12" ]]; then
+          export DEFCONFIG="rsuntk-m12_defconfig"
+          export DEVICE="M127F"
+          export DEVICE_ID="M12"
+          export KERNELSU="${{ github.event.inputs.KSU }}"
+        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12_susfs" ]]; then
+          export DEFCONFIG="rsuntk-m12-susfs_defconfig"
+          export DEVICE="M127F"
+          export DEVICE_ID="M12"
         fi
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
