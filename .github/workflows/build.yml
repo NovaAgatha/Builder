@@ -74,19 +74,23 @@ jobs:
           export DEVICE="A127F"
           export DEVICE_ID="A12s"
           export KERNELSU="${{ github.event.inputs.KSU }}"
+          export CI_SUSFS_ENABLED=0
         elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s_susfs" ]]; then
           export DEFCONFIG="rsuntk-a12s-susfs_defconfig"
           export DEVICE="A127F"
           export DEVICE_ID="A12s"
+          export CI_SUSFS_ENABLED=1
         elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12" ]]; then
           export DEFCONFIG="rsuntk-m12_defconfig"
           export DEVICE="M127F"
           export DEVICE_ID="M12"
           export KERNELSU="${{ github.event.inputs.KSU }}"
+          export CI_SUSFS_ENABLED=0
         elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12_susfs" ]]; then
           export DEFCONFIG="rsuntk-m12-susfs_defconfig"
           export DEVICE="M127F"
           export DEVICE_ID="M12"
+          export CI_SUSFS_ENABLED=1
         fi
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
@@ -101,11 +105,11 @@ jobs:
         
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
-        if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
+        if [[ "${{ github.event.inputs.KSU }}" = "true" ]] && [[ "$CI_SUSFS_ENABLED" = "0" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
         	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
           SUSFS_VERSION="-1"
-        elif [[ "$DEFCONFIG" = "rsuntk-susfs_defconfig" ]]; then
+        elif [[ "$CI_SUSFS_ENABLED" = "1" ]]; then
           KSU_VERSION="v1.0.2-40-legacy"
           SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
         else	
