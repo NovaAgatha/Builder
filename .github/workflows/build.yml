@@ -50,9 +50,11 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        git clone --depth=1 --single-branch https://github.com/Kry9toN/clang.git -b dev/13.0 clang
+        #git clone --depth=1 --single-branch https://github.com/Kry9toN/clang.git -b dev/13.0 clang
         #git clone --depth=1 https://github.com/rsuntk/toolchains.git -b clang-12 clang
-        #git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
+        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/llvm-r450784/clang-r433403.tar.gz"
+        mkdir clang && cd clang && wget -q -O clang.tar.gz $URL && tar -xf clang.tar.gz && rm *.gz && cd ..
+        git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
       working-directory: kernel_root
     - name: Prepare timezone fix
       run: |
@@ -63,8 +65,8 @@ jobs:
       id: buildKernel
       run: |
         export PATH=$(pwd)/toolchains/clang/bin:$PATH
-        #export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
-        export CROSS_COMPILE=$(pwd)/toolchains/clang/bin/aarch64-linux-gnu-
+        export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
+        #export CROSS_COMPILE=$(pwd)/toolchains/clang/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
