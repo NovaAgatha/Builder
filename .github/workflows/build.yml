@@ -68,14 +68,15 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        echo "[+] Cloning Android clang 16"
+        #echo "[+] Cloning Android clang 16"
         #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
-        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz"
+        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz"
         
-        mkdir clang && cd clang
-        wget -q -O clang.tar.gz $URL 
-        tar -xf clang.tar.gz && rm clang.tar.gz && cd ..
-        git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
+        #mkdir clang && cd clang
+        #wget -q -O clang.tar.gz $URL 
+        #tar -xf clang.tar.gz && rm clang.tar.gz && cd ..
+        git clone --single-branch --depth=1 https://github.com/rsuntk/toolchains.git -b clang-11 clang-11
+        git clone --single-branch --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
       working-directory: kernel_root
       
     - name: Build kernel
