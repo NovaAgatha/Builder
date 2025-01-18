@@ -50,8 +50,9 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        git clone --depth=1 https://github.com/rsuntk/toolchains.git -b clang-12 clang-12
-        git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
+        git clone --depth=1 --single-branch https://github.com/Kry9toN/clang.git -b dev/13.0 clang
+        #git clone --depth=1 https://github.com/rsuntk/toolchains.git -b clang-12 clang
+        #git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/aarch64-linux-android.git google
       working-directory: kernel_root
     - name: Prepare timezone fix
       run: |
@@ -61,9 +62,9 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        CLANG_VERSION=12 && echo "CLANG_VERSION=$CLANG_VERSION" >> $GITHUB_ENV
-        export PATH=$(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin:$PATH
-        export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
+        export PATH=$(pwd)/toolchains/clang/bin:$PATH
+        #export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
+        export CROSS_COMPILE=$(pwd)/toolchains/clang/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
@@ -203,7 +204,7 @@ jobs:
         # Start stripping
         for file in $LIST; do
           echo -e "- Stripping `basename $file`"
-          $(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin/llvm-strip "$file" --strip-unneeded
+          $(pwd)/toolchains/clang/bin/llvm-strip "$file" --strip-unneeded
         done
         mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
       working-directory: kernel_root
