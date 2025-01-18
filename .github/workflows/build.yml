@@ -33,8 +33,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: rsuntkOrgs/android_kernel_samsung_exynos850-111
+        repository: rsuntk/kernel_samsung_universal3830
         path: kernel_root
+        token: ${{ secrets.GIT_PAT_A12S }}
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
