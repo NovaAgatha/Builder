@@ -74,7 +74,7 @@ jobs:
         export IS_CI=true
 
         if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s" ]]; then
-          export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
+          export DEFCONFIG="rsuntk-a12s_defconfig"
           export DEVICE="A127F"
           export DEVICE_ID="A12s"
           export KERNELSU="${{ github.event.inputs.KSU }}"
