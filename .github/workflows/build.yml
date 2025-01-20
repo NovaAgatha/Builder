@@ -1,0 +1,220 @@
+name: Build Kernel
+on:
+  workflow_dispatch:
+    inputs:
+      BRANCH:
+        description: Kernel branch
+        default: 'upstream'
+        required: true
+      LTO:
+        description: 'Link Time Optimisation'
+        required: true
+        default: 'none'
+        type: choice
+        options:
+          - none
+          - thin
+          - full
+      TARGET_DEVICE:
+        description: 'Device target'
+        required: true
+        default: 'a34x'
+        type: choice
+        options:
+          - a34x
+          - m53x
+      KSU:
+        description: Add KernelSU support
+        type: boolean
+      UPLOAD_TO_TG:
+        description: Upload to Telegram (setup env required)
+        type: boolean
+      UPLOAD_LKM:
+        description: Upload LKM
+        type: boolean
+      SELINUX_PERMISSIVE:
+        description: Permissive SELinux
+        type: boolean
+        
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: telegramUpload
+    steps:
+    - name: Get date
+      id: rundate
+      run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
+    - uses: actions/checkout@v4
+      with:
+        repository: rsuntk/kernel_samsung_mt6877
+        path: kernel_root
+        token: ${{ secrets.GIT_PAT_A34 }}
+        ref: ${{ github.event.inputs.BRANCH }}
+        show-progress: false
+        fetch-depth: 1
+        
+    - name: Telegram msg
+      if: github.event.inputs.UPLOAD_TO_TG = 'true'
+      uses: cbrgm/telegram-github-action@v1
+      with:
+        to: ${{ secrets.CHAT_ID }}
+        token: ${{ secrets.BOT_TOKEN }}
+        disable-web-page-preview: true
+        parse-mode: html
+        message: |
+          @${{ github.actor }} triggered a kernel build!
+
+          <b>Start:</b> ${{ steps.rundate.outputs.REPO_DATE }}
+          <b>Device:</b> ${{ github.event.inputs.TARGET_DEVICE }}
+          <b>Branch:</b> ${{ github.event.inputs.BRANCH }}
+          <b>Workflows:</b> ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          <b>Repository:</b> ${{ github.server_url }}/${{ github.repository }}
+          
+    - name: Prepare dependencies
+      run: |
+        sudo apt update -y
+        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget curl lz4 -y
+        sudo aptitude install libssl-dev -y
+        
+    - name: Fetch toolchains
+      run: |
+        mkdir toolchains
+        cd toolchains
+        mkdir clang && cd clang
+        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
+        wget -q -O clang.tar.gz $URL
+        tar -xf clang.tar.gz && rm clang.tar.gz && cd ..
+        git clone --depth=1 https://github.com/VH-Devices/toolchains.git -b gcc-10.3.0 gcc-10
+      working-directory: kernel_root
+    - name: Prepare timezone fix
+      run: |
+        sudo rm /etc/localtime
+        sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+      
+    - name: Build kernel
+      id: buildKernel
+      run: |
+        export PATH=$(pwd)/toolchains/clang/bin:$PATH
+        export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
+        export CLANG_TRIPLE=aarch64-linux-gnu-
+        export LTO="${{ github.event.inputs.LTO }}"
+        export KBUILD_BUILD_USER="rsuntk"
+        export KBUILD_BUILD_HOST="rsuntkOrgs"
+        export BUILD_START=`date`
+        export IS_CI=true
+        export LLVM=1
+        export LLVM_IAS=1
+        export DEFCONFIG="rsuntk-${{ github.event.inputs.TARGET_DEVICE }}_defconfig"
+
+        if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a34x" ]]; then
+          export DEVICE="A346E"
+          export DEVICE_ID="A34 5G"
+        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m53x" ]]; then
+          export DEVICE="M536B"
+          export DEVICE_ID="M53 5G"
+        fi
+        export KERNELSU="${{ github.event.inputs.KSU }}"
+
+        if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
+          cd security && rm -rf selinux
+          git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux
+          rm -rf selinux/.git && cd ..
+          echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
+          SELINUX_STATE="Permissive"
+        else
+          SELINUX_STATE="Enforcing"
+        fi
+        
+        bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
+        
+        if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
+        	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
+        	KSU_VERSION=$(expr 10200 + $KSU_REV_COUNT)
+        else
+        	KSU_VERSION="No KernelSU"
+        fi
+        echo "- KernelSU version: $KSU_VERSION"
+        
+        ## CREATE buildDetails.txt
+        printf "Localversion: `./getutsrel`
+        Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
+        Build: `echo $BUILD_START`
+        Defconfig: `echo $DEFCONFIG`
+        KernelSU: `echo $KSU_VERSION`
+        LTO: `echo $LTO`
+        SELinux: `echo $SELINUX_STATE`
+        " >> buildDetails.txt
+        
+        echo "TITLE=Galaxy `echo $DEVICE_ID` Kernel" >> $GITHUB_ENV
+        
+        echo ""
+        echo "===================================================="
+        strings out/arch/arm64/boot/Image | grep "Linux version"
+        echo "===================================================="
+
+        mv out/.config out/build_config.txt
+        gitsha1=$(git rev-parse --short HEAD)
+        buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
+      working-directory: kernel_root
+      
+    - name: Upload config
+      uses: actions/upload-artifact@v4
+      with:
+        name: Config-${{ steps.buildKernel.outputs.buildDetails }}
+        path: kernel_root/out/build_config.txt
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build-${{ steps.buildKernel.outputs.buildDetails }}
+        path: |
+          kernel_root/out/arch/arm64/boot/*.gz
+          kernel_root/out/arch/arm64/boot/dts/mediatek/*.dtb
+
+    - name: Upload AnyKernel3
+      uses: actions/upload-artifact@v4
+      with:
+        name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
+        path: kernel_root/AnyKernel3/*
+        compression-level: 9
+        
+    - name: Upload to Telegram
+      if: github.event.inputs.UPLOAD_TO_TG == 'true'
+      env:
+        CHAT_ID: ${{ secrets.CHAT_ID }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      run: |
+        if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
+          ZIP=$(find `pwd` -name "*.zip")
+          bash $(pwd)/scripts/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
+        fi
+      working-directory: kernel_root
+        
+    - name: Strip LKMs
+      if: github.event.inputs.UPLOAD_LKM == 'true'
+      run: |
+        # Cleanup zip
+        rm -rf *.zip
+
+        # Create folder
+        mkdir ../kernel_object_tmp
+        mkdir kernel_object
+
+        # Only move neccessary path!
+        find $(pwd) -type f -name "*.ko" -exec mv {} ../kernel_object_tmp \;
+        LIST=$(find ../kernel_object_tmp -type f -name "*.ko")
+
+        # Start stripping
+        for file in $LIST; do
+          echo -e "- Stripping `basename $file`"
+          $(pwd)/toolchains/clang/bin/llvm-strip "$file" --strip-unneeded
+        done
+        mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
+      working-directory: kernel_root
+        
+    - name: Upload LKM
+      if: github.event.inputs.UPLOAD_LKM == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: LKM-${{ steps.buildKernel.outputs.buildDetails }}
+        path: kernel_root/kernel_object/*
