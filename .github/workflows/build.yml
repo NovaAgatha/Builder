@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'staging/U7'
+        default: 'linux-4.19.y'
         required: true
       DEFCONFIG:
         description: Defconfig
