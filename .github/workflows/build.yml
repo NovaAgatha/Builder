@@ -37,8 +37,8 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        git clone --depth=1 https://github.com/rsuntk/toolchains.git -b clang-11 clang-11
-        git clone --depth=1 https://github.com/rsuntk/toolchains.git -b androidcc-4.9 google
+        git clone --depth=1 --single-branch https://github.com/rsuntk/toolchains.git -b clang-12 clang
+        git clone --depth=1 --single-branch https://github.com/rsuntk/toolchains.git -b androidcc-4.9 google
       working-directory: kernel_root
     - name: Prepare timezone fix
       run: |
@@ -48,8 +48,7 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        CLANG_VERSION=11 && echo "CLANG_VERSION=$CLANG_VERSION" >> $GITHUB_ENV
-        export PATH=$(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin:$PATH
+        export PATH=$(pwd)/toolchains/clang/bin:$PATH
         export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_USER="rsuntk"
@@ -104,42 +103,30 @@ jobs:
         name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
         path: kernel_root/AnyKernel3/*
         compression-level: 9
-      
-    - name: Check need LKM stripping
-      id: need_strip
-      run: |
-        LKM=$(find $(pwd) -type f -name "*.ko")
-        if [ "$LKM" = "" ]; then
-          echo "UPLOAD=false" >> $GITHUB_OUTPUT
-        else
-          echo "UPLOAD=true" >> $GITHUB_OUTPUT
-        fi
         
-    - name: Strip LKMs
-      if: steps.need_strip.outputs.UPLOAD == 'true'
-      run: |
-        # Cleanup zip
-        rm -rf *.zip
-
-        # Create folder
-        mkdir ../kernel_object_tmp
-        mkdir kernel_object
-
-        # Only move neccessary path!
-        find $(pwd) -type f -name "*.ko" -exec mv {} ../kernel_object_tmp \;
-        LIST=$(find ../kernel_object_tmp -type f -name "*.ko")
-
-        # Start stripping
-        for file in $LIST; do
-          echo -e "- Stripping `basename $file`"
-          $(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin/llvm-strip "$file" --strip-unneeded
-        done
-        mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
-      working-directory: kernel_root
+#    - name: Strip LKMs
+#      run: |
+#        # Cleanup zip
+#        rm -rf *.zip
+#
+#        # Create folder
+#        mkdir ../kernel_object_tmp
+#        mkdir kernel_object
+#
+#        # Only move neccessary path!
+#        find $(pwd) -type f -name "*.ko" -exec mv {} ../kernel_object_tmp \;
+#        LIST=$(find ../kernel_object_tmp -type f -name "*.ko")#
+#
+#        # Start stripping
+#        for file in $LIST; do
+#          echo -e "- Stripping `basename $file`"
+#          $(pwd)/toolchains/clang/bin/llvm-strip "$file" --strip-unneeded
+#        done
+#        mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
+#      working-directory: kernel_root
         
     - name: Upload LKM
-      if: steps.need_strip.outputs.UPLOAD == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: LKM-${{ steps.buildKernel.outputs.buildDetails }}
-        path: kernel_root/kernel_object/*
+        path: kernel_root/*.gz
