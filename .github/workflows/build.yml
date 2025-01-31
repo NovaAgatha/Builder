@@ -50,13 +50,13 @@ jobs:
       id: getdev
       run: |
         DEVICE_TARGET="${{ github.event.inputs.TARGET_DEVICE }}"
-        if [[ '$DEVICE_TARGET' = 'a05m' ]]; then
+        if [[ "$DEVICE_TARGET" = "a05m" ]]; then
           CHAT_IDX="${{ secrets.CHAT_ID_A05 }}"
           DEFCONFIGX="${{ github.event.inputs.DEFCONFIG }}"
           DEVICE_MODEL="A055F"
           DEVICE="a05m"
           DEVICE_ID="A05"
-        elif [[ '$DEVICE_TARGET' = 'a04' ]]; then
+        elif [[ "$DEVICE_TARGET" = "a04" ]]; then
           CHAT_IDX="${{ secrets.CHAT_ID }}"
           DEFCONFIGX="rsuntk-a04_defconfig"
           DEVICE_MODEL="A045F"
