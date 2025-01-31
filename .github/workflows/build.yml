@@ -6,10 +6,18 @@ on:
         description: Kernel branch
         default: 'linux-4.19.y'
         required: true
-      DEFCONFIG:
-        description: Defconfig
+      DEFCONFIG: 
+        description: Defconfig (only for a05m)
         default: 'rsuntk-a05m_defconfig'
+        required: false
+      TARGET_DEVICE:
+        description: Target device
         required: true
+        default: 'a05m'
+        type: choice
+        options:
+          - a05m
+          - a04
       LTO:
         description: 'Link Time Optimisation'
         required: true
@@ -25,6 +33,9 @@ on:
       UPLOAD_TO_TG:
         description: Upload to Telegram
         type: boolean
+      UPLOAD_LKM:
+        description: Upload LKM
+        type: boolean
         
 jobs:
   build:
@@ -34,6 +45,31 @@ jobs:
     - name: Get date
       id: rundate
       run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
+    
+    - name: Get device target
+      id: getdev
+      run: |
+        DEVICE_TARGET="${{ github.event.inputs.TARGET_DEVICE }}"
+        if [[ '$DEVICE_TARGET' = 'a05m' ]]; then
+          CHAT_IDX="${{ secrets.CHAT_ID_A05 }}"
+          DEFCONFIGX="${{ github.event.inputs.DEFCONFIG }}"
+          DEVICE_MODEL="A055F"
+          DEVICE="a05m"
+          DEVICE_ID="A05"
+        elif [[ '$DEVICE_TARGET' = 'a04' ]]; then
+          CHAT_IDX="${{ secrets.CHAT_ID }}"
+          DEFCONFIGX="rsuntk-a04_defconfig"
+          DEVICE_MODEL="A045F"
+          DEVICE="a04"
+          DEVICE_ID="A04"
+        fi
+
+        echo "DEVICE=$DEVICE" >> $GITHUB_OUTPUT
+        echo "DEVICE_MODEL=$DEVICE_MODEL" >> $GITHUB_OUTPUT
+        echo "DEFCONFIG=$DEFCONFIGX" >> $GITHUB_OUTPUT
+        echo "CHAT_ID=$CHAT_IDX" >> $GITHUB_OUTPUT
+        echo "DEVICE_ID=$DEVICE_ID" >> $GITHUB_OUTPUT
+    
     - uses: actions/checkout@v4
       with:
         path: kernel_root
@@ -46,17 +82,17 @@ jobs:
       if: github.event.inputs.UPLOAD_TO_TG == 'true'
       uses: cbrgm/telegram-github-action@v1
       with:
-        to: ${{ secrets.CHAT_ID_A05 }}
+        to: ${{ steps.getdev.outputs.CHAT_ID }}
         token: ${{ secrets.BOT_TOKEN }}
         disable-web-page-preview: true
         parse-mode: html
         message: |
           @${{ github.actor }} triggered a kernel build!
           <b>Start:</b> ${{ steps.rundate.outputs.REPO_DATE }}
-          <b>Device:</b> a05m
+          <b>Device:</b> ${{ steps.getdev.outputs.DEVICE }}
           <b>Branch:</b> ${{ github.event.inputs.BRANCH }}
           <b>Workflows:</b> ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          <b>Repository:</b> https://github.com/rsuntkOrgs/android_kernel_samsung_a05
+          <b>Repository:</b> https://github.com/rsuntkOrgs/kernel_samsung_wingtech
         
     - name: Prepare dependencies
       run: |
@@ -96,12 +132,12 @@ jobs:
         export LLVM_IAS=1
 
         # clone mtk connectivity
-        rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
+        #rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
 
-        export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
-        export DEVICE="A055F"
-        export DEVICE_ID="A05"
-        export TARGET_PRODUCT=a05
+        export DEFCONFIG="${{ steps.getdev.outputs.DEFCONFIG }}"
+        export DEVICE="${{ steps.getdev.outputs.DEVICE_MODEL }}"
+        export DEVICE_ID="${{ steps.getdev.outputs.DEVICE_ID }}"
+        export TARGET_PRODUCT="${{ steps.getdev.outputs.DEVICE_MODEL }}"
         
         export KERNELSU="${{ github.event.inputs.KSU }}"
         
@@ -161,7 +197,7 @@ jobs:
     - name: Upload to Telegram
       if: github.event.inputs.UPLOAD_TO_TG == 'true'
       env:
-        CHAT_ID: ${{ secrets.CHAT_ID_A05 }}
+        CHAT_ID: ${{ steps.getdev.outputs.CHAT_ID }}
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       run: |
         if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
@@ -172,6 +208,7 @@ jobs:
       working-directory: kernel_root
         
     - name: Strip LKMs
+      if: github.event.inputs.UPLOAD_LKM == 'true'
       run: |
         # Cleanup zip
         rm -rf *.zip
