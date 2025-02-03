@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'upstream'
+        default: 'linux-4.19.y'
         required: true
       LTO:
         description: 'Link Time Optimisation'
@@ -46,9 +46,8 @@ jobs:
       run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
     - uses: actions/checkout@v4
       with:
-        repository: rsuntk/kernel_samsung_mt6877
+        repository: rsuntkOrgs/kernel_samsung_mt6877
         path: kernel_root
-        token: ${{ secrets.GIT_PAT_A34 }}
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
