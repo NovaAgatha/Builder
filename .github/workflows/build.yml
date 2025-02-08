@@ -83,7 +83,7 @@ jobs:
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date`
         export IS_CI=true
-        export DEFCONFIG="rsuntk-a34x_defconfig"
+        export DEFCONFIG="vendor/rsuntk-a34x_defconfig"
         export DEVICE="A346E"
         export DEVICE_ID="A34 5G"
         export KERNELSU="${{ github.event.inputs.KSU }}"
