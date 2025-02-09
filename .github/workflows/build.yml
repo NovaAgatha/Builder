@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'linux-4.19.y'
+        default: 'fourteen'
         required: true
       KSU:
         description: Add KernelSU support
@@ -29,7 +29,7 @@ jobs:
       run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
     - uses: actions/checkout@v4
       with:
-        repository: rsuntkOrgs/kernel_samsung_a34x
+        repository: rsuntkOrgs/kernel_samsung_m53x
         path: kernel_root
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
@@ -85,9 +85,9 @@ jobs:
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date`
         export IS_CI=true
-        export DEFCONFIG="vendor/rsuntk-a34x_defconfig"
-        export DEVICE="A346E"
-        export DEVICE_ID="A34 5G"
+        export DEFCONFIG="m53x_defconfig"
+        export DEVICE="M536B"
+        export DEVICE_ID="M53 5G"
         export KERNELSU="${{ github.event.inputs.KSU }}"
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
