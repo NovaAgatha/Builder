@@ -47,7 +47,7 @@ jobs:
           @${{ github.actor }} triggered a kernel build!
 
           <b>Start:</b> ${{ steps.rundate.outputs.REPO_DATE }}
-          <b>Device:</b> ${{ github.event.inputs.TARGET_DEVICE }}
+          <b>Device:</b> a34x
           <b>Branch:</b> ${{ github.event.inputs.BRANCH }}
           <b>Workflows:</b> ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           
@@ -92,7 +92,7 @@ jobs:
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           cd security && rm -rf selinux
-          git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux
+          git clone https://github.com/rsuntk/selinux_perm.git --single-branch --depth=1 -b bringup selinux
           rm -rf selinux/.git && cd ..
           echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
           SELINUX_STATE="Permissive"
