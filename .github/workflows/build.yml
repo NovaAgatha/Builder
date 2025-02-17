@@ -127,6 +127,7 @@ jobs:
         export BUILD_START=`date`
         export SELINUX_STATE="Enforcing"
         export IS_CI=true
+        export DEFAULT_KSU_BRANCH="optional_kp"
         export LTO="${{ github.event.inputs.LTO }}"
         export LLVM=1
         export LLVM_IAS=1
