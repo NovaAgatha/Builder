@@ -35,7 +35,6 @@ jobs:
       with:
         repository: rsuntk/kernel_samsung_universal3830
         path: kernel_root
-        token: ${{ secrets.GIT_PAT_A12S }}
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
@@ -69,6 +68,7 @@ jobs:
         #export CROSS_COMPILE=$(pwd)/toolchains/clang/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_USER="rsuntk"
+        export DEFAULT_KSU_BRANCH="optional_kp"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date`
         export IS_CI=true
