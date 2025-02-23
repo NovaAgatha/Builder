@@ -45,10 +45,11 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        URL="https://github.com/ZyCromerZ/Clang/releases/download/21.0.0git-20250215-release/Clang-21.0.0git-20250215.tar.gz"
-        wget -q -O "clang.tar.gz" $URL && mkdir clang-21 && cd clang-21 && mv ../*.gz . && tar -xvf *.gz && rm *.gz && cd ../..
+        #URL="https://github.com/ZyCromerZ/Clang/releases/download/21.0.0git-20250215-release/Clang-21.0.0git-20250215.tar.gz"
+        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android13-release/clang-r450784d.tar.gz"
+        wget -q -O "clang.tar.gz" $URL && mkdir clang && cd clang && mv ../*.gz . && tar -xvf *.gz && rm *.gz && cd ../..
         #curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-11
-        #curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
       working-directory: kernel_root
 
     - name: Prepare timezone fix
@@ -59,8 +60,8 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        export PATH=$(pwd)/toolchains/clang-21/bin:$PATH
-        export CROSS_COMPILE=aarch64-linux-gnu-
+        export PATH=$(pwd)/toolchains/clang/bin:$PATH
+        export CROSS_COMPILE="$(pwd)/toolchains/androidcc-4.9/bin/aarch64-linux-android-"
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export KBUILD_BUILD_USER="rsuntk"
