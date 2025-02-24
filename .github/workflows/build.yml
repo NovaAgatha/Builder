@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'linux-4.19.y'
+        default: 'linux-4.19.y-cip'
         required: true
       DEFCONFIG: 
         description: Defconfig (only for a05m)
