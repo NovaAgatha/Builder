@@ -46,9 +46,10 @@ jobs:
         mkdir toolchains
         cd toolchains
         #URL="https://github.com/ZyCromerZ/Clang/releases/download/21.0.0git-20250215-release/Clang-21.0.0git-20250215.tar.gz"
-        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android13-release/clang-r450784d.tar.gz"
-        wget -q -O "clang.tar.gz" $URL && mkdir clang && cd clang && mv ../*.gz . && tar -xvf *.gz && rm *.gz && cd ../..
-        #curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-11
+        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android13-release/clang-r450784d.tar.gz"
+        #wget -q -O "clang.tar.gz" $URL && mkdir clang && cd clang && mv ../*.gz . && tar -xvf *.gz && rm *.gz && cd ../..
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-12
+        mv clang-12 clang
         curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
       working-directory: kernel_root
 
@@ -70,8 +71,6 @@ jobs:
         export DEFCONFIG="rsuntk_defconfig"
         export DEVICE=A235F
         export LTO="none"
-        export LLVM=1
-        export LLVM_IAS=1
         export SELINUX_STATE="Enforcing"
         
         if [[ "${{ github.event.inputs.SETUP_KSU }}" = "true" ]]; then 
