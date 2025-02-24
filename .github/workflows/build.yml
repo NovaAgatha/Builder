@@ -148,7 +148,7 @@ jobs:
         
         export KERNELSU="${{ github.event.inputs.KSU }}"
 
-                if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
+        if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           rm -rf security/selinux && cd security/ && git clone https://github.com/rsuntk/selinux_perm.git --depth=1 -b bringup selinux && rm -rf selinux/.git && cd ..
           echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
         fi
