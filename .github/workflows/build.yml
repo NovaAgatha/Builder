@@ -30,6 +30,12 @@ on:
       KSU:
         description: Add KernelSU support
         type: boolean
+      SELINUX_PERMISSIVE:
+        description: Set SELinux as Permissive by default
+        type: boolean
+      MISC_OPT_OVERCLOCK:
+        description: Overclock GPU to 800 MHz
+        type: boolean
       UPLOAD_TO_TG:
         description: Upload to Telegram
         type: boolean
@@ -73,7 +79,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: kernel_root
-        repository: "rsuntkOrgs/kernel_samsung_wingtech"
+        repository: "NovaAgatha/kernel_samsung_wingtech"
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
@@ -141,6 +147,14 @@ jobs:
         export TARGET_PRODUCT="${{ steps.getdev.outputs.DEVICE_MODEL }}"
         
         export KERNELSU="${{ github.event.inputs.KSU }}"
+
+                if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
+          rm -rf security/selinux && cd security/ && git clone https://github.com/rsuntk/selinux_perm.git --depth=1 -b bringup selinux && rm -rf selinux/.git && cd ..
+          echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
+        fi
+        if [[ "${{ github.event.inputs.MISC_OPT_OVERCLOCK }}" = "true" ]]; then
+          echo "CONFIG_MISC_OPT_OVERCLOCK=y" >>  arch/arm64/configs/$DEFCONFIG
+        fi
         
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
