@@ -72,6 +72,7 @@ jobs:
         export BUILD_START=`date`
         export IS_CI=true
         export DEFCONFIG="a12s_defconfig"
+        export PLATFORM_VERSION=13
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           cd security && rm -rf selinux
