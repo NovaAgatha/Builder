@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'T_UD'
+        default: 'staging'
         required: true
       TARGET_DEVICE:
         description: 'Device'
@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: rsuntk/kernel_samsung_universal3830
+        repository: rsuntkOrgs/kernel_samsung_exynos850
         path: kernel_root
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
@@ -68,34 +68,10 @@ jobs:
         #export CROSS_COMPILE=$(pwd)/toolchains/clang/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_USER="rsuntk"
-        export DEFAULT_KSU_BRANCH="optional_kp"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date`
         export IS_CI=true
-
-        if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s" ]]; then
-          export DEFCONFIG="rsuntk-a12s_defconfig"
-          export DEVICE="A127F"
-          export DEVICE_ID="A12s"
-          export KERNELSU="${{ github.event.inputs.KSU }}"
-          export CI_SUSFS_ENABLED=0
-        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s_susfs" ]]; then
-          export DEFCONFIG="rsuntk-a12s-susfs_defconfig"
-          export DEVICE="A127F"
-          export DEVICE_ID="A12s"
-          export CI_SUSFS_ENABLED=1
-        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12" ]]; then
-          export DEFCONFIG="rsuntk-m12_defconfig"
-          export DEVICE="M127F"
-          export DEVICE_ID="M12"
-          export KERNELSU="${{ github.event.inputs.KSU }}"
-          export CI_SUSFS_ENABLED=0
-        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12_susfs" ]]; then
-          export DEFCONFIG="rsuntk-m12-susfs_defconfig"
-          export DEVICE="M127F"
-          export DEVICE_ID="M12"
-          export CI_SUSFS_ENABLED=1
-        fi
+        export DEFCONFIG="a12s_defconfig"
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           cd security && rm -rf selinux
