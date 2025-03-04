@@ -13,9 +13,7 @@ on:
         type: choice
         options:
           - a12s
-          - a12s_susfs
           - m12
-          - m12_susfs
       KSU:
         description: Add KernelSU support
         type: boolean
@@ -108,11 +106,6 @@ jobs:
         " >> buildDetails.txt
         
         echo "TITLE=Galaxy `echo $DEVICE_ID` Kernel" >> $GITHUB_ENV
-        
-        echo ""
-        echo "===================================================="
-        strings out/arch/arm64/boot/Image | grep "Linux version"
-        echo "===================================================="
 
         mv out/.config out/build_config.txt
         gitsha1=$(git rev-parse --short HEAD)
