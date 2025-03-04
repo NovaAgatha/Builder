@@ -79,12 +79,13 @@ jobs:
           git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux
           rm -rf selinux/.git && cd ..
           echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
+          cat arch/arm64/configs/$DEFCONFIG | grep "PERMISSIVE"
           SELINUX_STATE="Permissive"
         else
           SELINUX_STATE="Enforcing"
         fi
         
-        bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
+        bash $(pwd)/build.sh kernel --jobs $(nproc --all) $(echo $DEFCONFIG)
         
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
