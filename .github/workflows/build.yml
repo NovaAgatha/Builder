@@ -36,6 +36,9 @@ on:
       UPLOAD_LKM:
         description: Upload LKM
         type: boolean
+      SILENT_BUILD:
+        description: Silent Build logs
+        type: boolean
         
 jobs:
   build:
@@ -141,6 +144,7 @@ jobs:
         export TARGET_PRODUCT="${{ steps.getdev.outputs.DEVICE_MODEL }}"
         
         export KERNELSU="${{ github.event.inputs.KSU }}"
+        export SILENT="${{ github.event.inputs.SILENT_BUILD }}"
         
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
