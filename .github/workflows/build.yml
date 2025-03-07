@@ -80,7 +80,7 @@ jobs:
 
         if [[ "${{ github.event.inputs.KBUILD_LLVM }}" = "true" ]]; then
           export LLVM=1
-          export LLVM_IAS=1
+          #export LLVM_IAS=1
         fi
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
