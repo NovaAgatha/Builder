@@ -54,7 +54,8 @@ jobs:
         mkdir toolchains
         cd toolchains
         if [[ "${{ github.event.inputs.CLANG_FOURTEEN }}" = "true" ]]; then
-          URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/llvm-r450784/clang-r433403.tar.gz"
+          #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/llvm-r450784/clang-r433403.tar.gz"
+          URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android13-gsi/clang-r450784d.tar.gz"
           echo "[+] Fetching clang 14"
           mkdir clang && cd clang && wget -q -O clang.tar.gz $URL && tar -xf clang.tar.gz && rm *.gz && cd ..
         else
