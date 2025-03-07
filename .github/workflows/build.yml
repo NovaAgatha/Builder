@@ -73,6 +73,7 @@ jobs:
         export DEVICE="A127F"
         export DEVICE_ID="A12s"
         export PLATFORM_VERSION=13
+        export KERNELSU="${{ github.event.inputs.KSU }}"
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           cd security && rm -rf selinux
