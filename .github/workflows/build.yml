@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'staging'
+        default: 'android-4.19'
         required: true
       TARGET_DEVICE:
         description: 'Device'
