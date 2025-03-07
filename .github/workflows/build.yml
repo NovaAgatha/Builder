@@ -69,7 +69,7 @@ jobs:
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date`
         export IS_CI=true
-        export DEFCONFIG="a12s_defconfig"
+        export DEFCONFIG="exynos850-a12snsxx_defconfig"
         export DEVICE="A127F"
         export DEVICE_ID="A12s"
         export PLATFORM_VERSION=13
