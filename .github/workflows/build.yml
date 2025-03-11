@@ -13,7 +13,7 @@ on:
           - full
       BRANCH:
         description: Kernel branch
-        default: 'fourteen'
+        default: 'stock-U9'
         required: true
       SETUP_KSU:
         description: KernelSU support (optional)
@@ -30,7 +30,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: kernel_root
-        repository: rsuntkOrgs/kernel_samsung_a23
+        repository: rsuntkOrgs/kernel_samsung_a23q
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
@@ -45,12 +45,9 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        #URL="https://github.com/ZyCromerZ/Clang/releases/download/21.0.0git-20250215-release/Clang-21.0.0git-20250215.tar.gz"
-        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android13-release/clang-r450784d.tar.gz"
-        #wget -q -O "clang.tar.gz" $URL && mkdir clang && cd clang && mv ../*.gz . && tar -xvf *.gz && rm *.gz && cd ../..
         curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-12
-        mv clang-12 clang
         curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
+        mv clang-12 clang && cd ..
       working-directory: kernel_root
 
     - name: Prepare timezone fix
@@ -70,7 +67,7 @@ jobs:
         export IS_CI=true
         export DEFCONFIG="rsuntk_defconfig"
         export DEVICE=A235F
-        export LTO="none"
+        export LTO="thin"
         export SELINUX_STATE="Enforcing"
         
         if [[ "${{ github.event.inputs.SETUP_KSU }}" = "true" ]]; then 
