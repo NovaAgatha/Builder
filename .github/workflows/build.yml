@@ -24,7 +24,7 @@ on:
         description: Permissive SELinux
         type: boolean
       KBUILD_LLVM:
-        description: Build with LLVM
+        description: Build with LLVM+IAS
         type: boolean
       CLANG_THIRTEEN:
         description: Build with Clang 13
@@ -88,6 +88,7 @@ jobs:
         if [[ "${{ github.event.inputs.KBUILD_LLVM }}" = "true" ]]; then
           echo "[+] Building with LLVM=1 ..."
           export LLVM=1
+          export LLVM_IAS=1
         fi
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
