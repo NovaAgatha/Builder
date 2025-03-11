@@ -67,7 +67,7 @@ jobs:
         export IS_CI=true
         export DEFCONFIG="rsuntk_defconfig"
         export DEVICE=A235F
-        export LTO="thin"
+        export LTO="${{ github.event.inputs.LTO }}"
         export SELINUX_STATE="Enforcing"
         
         if [[ "${{ github.event.inputs.SETUP_KSU }}" = "true" ]]; then 
