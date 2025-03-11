@@ -69,10 +69,7 @@ jobs:
         export DEVICE=A235F
         export LTO="${{ github.event.inputs.LTO }}"
         export SELINUX_STATE="Enforcing"
-        
-        if [[ "${{ github.event.inputs.SETUP_KSU }}" = "true" ]]; then 
-          export KERNELSU=true
-        fi
+        export KERNELSU="${{ github.event.inputs.SETUP_KSU }}"
         
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
@@ -93,11 +90,6 @@ jobs:
         LTO: `echo $LTO`
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
-        
-        echo ""
-        echo "===================================================="
-        strings out/arch/arm64/boot/Image | grep "Linux version"
-        echo "===================================================="
         mv out/.config out/build_config.txt
         gitsha1=$(git rev-parse --short HEAD)
         buildDetails="`make kernelversion`_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
