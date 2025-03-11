@@ -97,7 +97,7 @@ jobs:
         Build date: `echo $BUILD_START`
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
-        LTO: `echo $LTO`
+        LTO: thin
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
         
@@ -137,7 +137,7 @@ jobs:
     - name: Upload to Telegram
       if: github.event.inputs.UPLOAD_TO_TG == 'true'
       env:
-        CHAT_ID: ${{ steps.getdev.outputs.CHAT_ID }}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       run: |
         if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
