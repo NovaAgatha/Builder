@@ -92,7 +92,7 @@ jobs:
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           cd security && rm -rf selinux
-          git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux
+          git clone https://github.com/rsuntk/selinux_perm.git -b bringup --depth=1 selinux
           rm -rf selinux/.git && cd ..
           echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
           cat arch/arm64/configs/$DEFCONFIG | grep "PERMISSIVE"
