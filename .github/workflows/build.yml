@@ -4,21 +4,12 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'android-4.14-stable'
+        default: 'openela'
         required: true
       DEFCONFIG: 
         description: Defconfig
         default: 'rsuntk_defconfig'
         required: false
-      LTO:
-        description: 'Link Time Optimisation'
-        required: true
-        default: 'none'
-        type: choice
-        options:
-          - none
-          - thin
-          - full
       KSU:
         description: Add KernelSU support
         type: boolean
@@ -74,7 +65,6 @@ jobs:
         export BUILD_START=`date`
         export SELINUX_STATE="Enforcing"
         export IS_CI=true
-        export LTO="${{ github.event.inputs.LTO }}"
         export DEFCONFIG="${{ github.event.inputs.DEFCONFIG }}"
         export DEVICE="M325FV"
         export DEVICE_ID="M32"
