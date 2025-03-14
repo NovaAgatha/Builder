@@ -77,19 +77,19 @@ jobs:
         mkdir toolchains
         cd toolchains
         mkdir clang && cd clang
-        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
-        #URL="https://github.com/ZyCromerZ/Clang/releases/download/21.0.0git-20250208-release/Clang-21.0.0git-20250208.tar.gz"
+        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
+        URL="https://github.com/ZyCromerZ/Clang/releases/download/21.0.0git-20250314-release/Clang-21.0.0git-20250314.tar.gz"
+        echo "[+] Fetching ZyClang 21 ..."
         wget -q -O clang.tar.gz $URL
         tar -xf clang.tar.gz && rm clang.tar.gz && cd ..
-        git clone --depth=1 https://github.com/VH-Devices/toolchains.git -b gcc-10.3.0 gcc-10
       working-directory: kernel_root
       
     - name: Build kernel
       id: buildKernel
       run: |
         export PATH=$(pwd)/toolchains/clang/bin:$PATH
-        export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
-        #export CROSS_COMPILE="aarch64-linux-gnu-"
+        #export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
+        export CROSS_COMPILE="aarch64-linux-gnu-"
         export CLANG_TRIPLE="aarch64-linux-gnu-"
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
