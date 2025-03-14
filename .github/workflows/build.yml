@@ -47,7 +47,7 @@ jobs:
         cd toolchains
         curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-11
         curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
-        mv clang-12 clang && cd ..
+        mv clang-11 clang && cd ..
       working-directory: kernel_root
 
     - name: Prepare timezone fix
@@ -84,7 +84,7 @@ jobs:
         ## CREATE buildDetails.txt
         printf "Localversion: `./getutsrel`
         Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
-        Build: `date +'%d %B %Y @ %m:%M'`
+        Build: `date +'%d %B %Y'`
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
         LTO: `echo $LTO`
