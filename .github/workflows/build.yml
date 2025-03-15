@@ -80,6 +80,12 @@ jobs:
         	KSU_VERSION="No KernelSU"
         fi
         echo "- KernelSU version: $KSU_VERSION"
+
+        if [ -d $(pwd)/include/linux/susfs.h ]; then
+          SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
+        else
+          SUSFS_VERSION="Not available"
+        fi
         
         ## CREATE buildDetails.txt
         printf "Localversion: `./getutsrel`
@@ -87,6 +93,7 @@ jobs:
         Build date: `echo $BUILD_START`
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
+        Susfs: `echo $SUSFS_VERSION`
         LTO: none
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
