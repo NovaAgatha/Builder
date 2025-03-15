@@ -81,7 +81,7 @@ jobs:
         fi
         echo "- KernelSU version: $KSU_VERSION"
 
-        if [ -d $(pwd)/include/linux/susfs.h ]; then
+        if [ -e $(pwd)/include/linux/susfs.h ]; then
           SUSFS_VERSION=$(cat ./include/linux/susfs.h | grep -E '^#define SUSFS_VERSION' | cut -d' ' -f3 | sed 's/"//g')
         else
           SUSFS_VERSION="Not available"
