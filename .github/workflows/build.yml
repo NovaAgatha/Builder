@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'openela'
+        default: 'rc2'
         required: true
       DEFCONFIG: 
         description: Defconfig
@@ -87,7 +87,7 @@ jobs:
         Build date: `echo $BUILD_START`
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
-        LTO: thin
+        LTO: none
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
         
