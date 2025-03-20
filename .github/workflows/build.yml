@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'rc2'
+        default: 'staging'
         required: true
       DEFCONFIG: 
         description: Defconfig
@@ -53,10 +53,8 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-12
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
-        mv clang-12 clang
-        mv androidcc-4.9 google
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-12 && mv clang* clang
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9 && mv androidcc* google
       working-directory: kernel_root
       
     - name: Build kernel
