@@ -19,6 +19,12 @@ on:
       UPLOAD_LKM:
         description: Upload LKM
         type: boolean
+      LLVM:
+        description: LLVM=1
+        type: boolean
+      LLVM_IAS:
+        description: LLVM_IAS=1 (must enable LLVM=1!)
+        type: boolean
         
 jobs:
   build:
@@ -70,6 +76,13 @@ jobs:
         export DEVICE_ID="M32"
         export TARGET_PRODUCT="m32"
         export KERNELSU="${{ github.event.inputs.KSU }}"
+
+        if [[ "${{ github.event.inputs.LLVM }}" = "true" ]]; then
+          export LLVM=1
+          if [[ "${{ github.event.inputs.LLVM_IAS }}" = "true" ]]; then
+            export LLVM_IAS=1
+          fi
+        fi
         
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
