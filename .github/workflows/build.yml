@@ -19,11 +19,8 @@ on:
       UPLOAD_LKM:
         description: Upload LKM
         type: boolean
-      LLVM:
-        description: LLVM=1
-        type: boolean
-      LLVM_IAS:
-        description: LLVM_IAS=1 (must enable LLVM=1!)
+      NEW_CLANG:
+        description: Compile with newer Clang (clang-15)
         type: boolean
         
 jobs:
@@ -53,10 +50,19 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-12 && mv clang* clang
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9 && mv androidcc* google
+        if [[ "${{ github.event.inputs.NEW_CLANG }}" = "true" ]]; then
+          URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/tags/android-u-beta-1-gpl/clang-r458507.tar.gz"
+          echo "INFO: Fetching newer clang"
+          wget -q -O clang.tar.gz $URL
+          mkdir clang && mv *.gz clang && cd clang && tar -xf *.gz
+          cd ../..
+        else
+          curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-12
+          mv clang* clang
+        fi
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
       working-directory: kernel_root
-      
+
     - name: Build kernel
       id: buildKernel
       run: |
@@ -74,6 +80,8 @@ jobs:
         export DEVICE_ID="M32"
         export TARGET_PRODUCT="m32"
         export KERNELSU="${{ github.event.inputs.KSU }}"
+        export LLVM=1
+        export LLVM_IAS=1
 
         if [[ "${{ github.event.inputs.LLVM }}" = "true" ]]; then
           export LLVM=1
