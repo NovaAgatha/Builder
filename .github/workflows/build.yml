@@ -36,6 +36,9 @@ on:
       UPLOAD_LKM:
         description: Upload LKM
         type: boolean
+      PERMISSIVE:
+        description: Permissive
+        type: boolean
       SILENT_BUILD:
         description: Silent Build logs
         type: boolean
@@ -128,17 +131,26 @@ jobs:
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date`
-        export SELINUX_STATE="Enforcing"
         export IS_CI=true
         export LTO="${{ github.event.inputs.LTO }}"
         export KCFLAGS=-w
         export LLVM=1
         export LLVM_IAS=1
+        export DEFCONFIG="${{ steps.getdev.outputs.DEFCONFIG }}"
+        
+        if [[ "${{ github.event.inputs.PERMISSIVE }}" = "true" ]]; then
+        	rm -rf security/selinux && cd security
+        	git clone --depth=1 --single-branch https://github.com/rsuntk/selinux_perm.git -b bringup selinux
+        	rm -rf ./selinux/.git && cd ..
+        	SELINUX_STATE="Permissive"
+        	echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
+        else
+        	SELINUX_STATE="Enforcing"
+        fi
 
         # clone mtk connectivity
         #rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
 
-        export DEFCONFIG="${{ steps.getdev.outputs.DEFCONFIG }}"
         export DEVICE="${{ steps.getdev.outputs.DEVICE_MODEL }}"
         export DEVICE_ID="${{ steps.getdev.outputs.DEVICE_ID }}"
         export TARGET_PRODUCT="${{ steps.getdev.outputs.DEVICE_MODEL }}"
