@@ -151,6 +151,12 @@ jobs:
         name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
         path: kernel_root/AnyKernel3/*
         compression-level: 9
+
+    - name: Cleanup useless files
+      continue-on-error: true
+      if: github.event.inputs.BUILD_TARGET == 'kernel'
+      run: |
+        rm out/vmlinux.o out/vmlinux out/System.map
         
     - name: Upload to Telegram
       if: github.event.inputs.UPLOAD_TO_TG == 'true'
