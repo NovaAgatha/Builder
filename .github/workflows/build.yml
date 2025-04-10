@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'upstream-base'
+        default: 'master'
         required: true
       BUILD_TARGET:
         description: 'Build target'
