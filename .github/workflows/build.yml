@@ -73,16 +73,23 @@ jobs:
       run: |
         export PATH=$(pwd)/toolchains/clang/bin:$PATH
         export CROSS_COMPILE=$(pwd)/toolchains/google/bin/aarch64-linux-android-
-        #export CROSS_COMPILE=$(pwd)/toolchains/clang/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
         export KBUILD_BUILD_USER="rsuntk"
-        export KBUILD_BUILD_HOST="rsuntkOrgs"
+        export KBUILD_BUILD_HOST="nobody"
         export BUILD_START=`date`
         export IS_CI=true
-        export DEFCONFIG="exynos850-a12snsxx_defconfig"
-        export DEVICE="A127F"
-        export DEVICE_ID="A12s"
-        export PLATFORM_VERSION=13
+        
+        if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s" ]]; then
+          export DEFCONFIG="a12snsxx_defconfig"
+          export DEVICE="A127F"
+          export DEVICE_ID="A12s"
+        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12" ]]; then
+          export DEFCONFIG="m12nsxx_defconfig"
+          export DEVICE="M127F"
+          export DEVICE_ID="M12"
+        fi
+        
+        #export PLATFORM_VERSION=13
         export KERNELSU="${{ github.event.inputs.KSU }}"
 
         if [[ "${{ github.event.inputs.KBUILD_LLVM }}" = "true" ]]; then
