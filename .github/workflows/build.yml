@@ -65,7 +65,7 @@ jobs:
         echo "- KernelSU version: $KSU_VERSION"
         
         ## CREATE buildDetails.txt
-        printf "Localversion: `./getutsrel`
+        printf "Localversion: `cat out/include/config/kernel.release`
         Clang version: `clang -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//'`
         Build: `date +'%d %B %Y'`
         Defconfig: `echo $DEFCONFIG`
