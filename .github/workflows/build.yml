@@ -2,15 +2,10 @@ name: Build Kernel
 on:
   workflow_dispatch:
     inputs:
-      LTO:
-        description: 'Link Time Optimisation'
+      REPOSITORY:
+        description: Kernel repository
+        default: 'rsuntk/android_kernel_samsung_sm6225'
         required: true
-        default: 'none'
-        type: choice
-        options:
-          - none
-          - thin
-          - full
       BRANCH:
         description: Kernel branch
         default: 'stock-U9'
@@ -30,7 +25,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: kernel_root
-        repository: rsuntkOrgs/kernel_samsung_a23q
+        repository: ${{ github.event.inputs.REPOSITORY }}
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
@@ -40,15 +35,6 @@ jobs:
         sudo apt update -y
         sudo apt install bc cpio flex bison aptitude git python-is-python3 libc6 libc6-dev tar perl curl lz4 -y
         sudo aptitude install libssl-dev -y
-        
-    - name: Fetch toolchains
-      run: |
-        mkdir toolchains
-        cd toolchains
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s clang-11
-        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
-        mv clang-11 clang && cd ..
-      working-directory: kernel_root
 
     - name: Prepare timezone fix
       run: |
@@ -58,18 +44,15 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        export PATH=$(pwd)/toolchains/clang/bin:$PATH
-        export CROSS_COMPILE="$(pwd)/toolchains/androidcc-4.9/bin/aarch64-linux-android-"
-        export CLANG_TRIPLE=aarch64-linux-gnu-
-        export KBUILD_BUILD_HOST="rsuntkOrgs"
-        export KBUILD_BUILD_USER="rsuntk"
         export BUILD_START=$(date)
         export IS_CI=true
-        export DEFCONFIG="rsuntk_defconfig"
         export DEVICE=A235F
-        export LTO="${{ github.event.inputs.LTO }}"
         export SELINUX_STATE="Enforcing"
         export KERNELSU="${{ github.event.inputs.SETUP_KSU }}"
+
+        if [[ "$KERNELSU" = "true" ]]; then
+          curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+        fi
         
         bash $(pwd)/build.sh kernel --jobs $(nproc --all) `echo $DEFCONFIG`
         
@@ -87,7 +70,6 @@ jobs:
         Build: `date +'%d %B %Y'`
         Defconfig: `echo $DEFCONFIG`
         KernelSU: `echo $KSU_VERSION`
-        LTO: `echo $LTO`
         SELinux: `echo $SELINUX_STATE`
         " >> buildDetails.txt
         mv out/.config out/build_config.txt
