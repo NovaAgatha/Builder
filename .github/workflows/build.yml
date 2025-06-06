@@ -25,7 +25,7 @@ on:
         
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: buildjet-8vcpu-ubuntu2204
     environment: telegramUpload
     steps:
     - name: Get date
