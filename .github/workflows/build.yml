@@ -103,6 +103,7 @@ jobs:
         tar -xf clang.tar.gz && rm clang.tar.gz && cd ..
         #git clone --single-branch --depth=1 https://github.com/rsuntk/toolchains.git -b clang-11 clang
         git clone --single-branch --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1.git gnu
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s arm-gnu
       working-directory: kernel_root
       
     - name: Build kernel
@@ -110,6 +111,8 @@ jobs:
       run: |
         export PATH=$(pwd)/toolchains/clang/bin:$PATH
         export CROSS_COMPILE="$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-"
+        export CROSS_COMPILE_COMPAT="$(pwd)/toolchains/arm-gnu/bin/arm-linux-gnueabi-"
+        export CROSS_COMPILE_ARM32=$CROSS_COMPILE_COMPAT
         export CLANG_TRIPLE=aarch64-linux-gnu-
 
         export KBUILD_BUILD_USER="rsuntk"
