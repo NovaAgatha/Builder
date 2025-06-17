@@ -57,7 +57,7 @@ jobs:
       run: |
         DEVICE_TARGET="${{ github.event.inputs.TARGET_DEVICE }}"
         if [[ "$DEVICE_TARGET" = "a05m" ]]; then
-          CHAT_IDX="${{ secrets.CHAT_ID_A05 }}"
+          CHAT_IDX="${{ secrets.CHAT_ID }}"
           DEFCONFIGX="${{ github.event.inputs.DEFCONFIG }}"
           DEVICE_MODEL="A055F"
           DEVICE="a05m"
@@ -94,9 +94,9 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
-        echo "[+] Cloning Android clang 16"
+        echo "[+] Cloning Android clang 14"
         #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
-        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r475365b.tar.gz"
+        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r450784e.tar.gz"
         
         mkdir clang && cd clang
         wget -q -O clang.tar.gz $URL 
@@ -111,8 +111,8 @@ jobs:
       run: |
         export PATH=$(pwd)/toolchains/clang/bin:$PATH
         export CROSS_COMPILE="$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-"
-        export CROSS_COMPILE_COMPAT="$(pwd)/toolchains/arm-gnu/bin/arm-linux-gnueabi-"
-        export CROSS_COMPILE_ARM32=$CROSS_COMPILE_COMPAT
+        #export CROSS_COMPILE_COMPAT="$(pwd)/toolchains/arm-gnu/bin/arm-linux-gnueabi-"
+        #export CROSS_COMPILE_ARM32=$CROSS_COMPILE_COMPAT
         export CLANG_TRIPLE=aarch64-linux-gnu-
 
         export KBUILD_BUILD_USER="rsuntk"
