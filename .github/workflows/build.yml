@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'android-4.19'
+        default: 'android-4.19-stable'
         required: true
       TARGET_DEVICE:
         description: 'Device'
@@ -31,7 +31,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: rsuntkOrgs/kernel_samsung_exynos850
+        repository: rsuntkOrgs/exynos850_ports
         path: kernel_root
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
@@ -71,7 +71,7 @@ jobs:
         export IS_CI=true
         
         if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s" ]]; then
-          export DEFCONFIG="a12snsxx_defconfig"
+          export DEFCONFIG="a12s_defconfig"
           export DEVICE="A127F"
           export DEVICE_ID="A12s"
         elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12" ]]; then
@@ -83,7 +83,7 @@ jobs:
         #export PLATFORM_VERSION=13
         export KERNELSU="${{ github.event.inputs.KSU }}"
         export LLVM=1
-        #export LLVM_IAS=1
+        export LLVM_IAS=1
 
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           cd security && rm -rf selinux
@@ -96,7 +96,7 @@ jobs:
           SELINUX_STATE="Enforcing"
         fi
         
-        bash $(pwd)/build.sh kernel --jobs $(nproc --all) $(echo $DEFCONFIG)
+        bash $(pwd)/prebuilt/build.sh kernel --jobs $(nproc --all) $(echo $DEFCONFIG)
         
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
         	KSU_REV_COUNT=$(cd KernelSU && git rev-list --count HEAD)
