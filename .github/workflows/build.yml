@@ -77,7 +77,7 @@ jobs:
           export DEVICE="A127F"
           export DEVICE_ID="A12s"
         elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12" ]]; then
-          export DEFCONFIG="m12nsxx_defconfig"
+          export DEFCONFIG="m12_defconfig"
           export DEVICE="M127F"
           export DEVICE_ID="M12"
         fi
