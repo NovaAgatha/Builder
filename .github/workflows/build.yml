@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'LuminousTwilight-CIP'
+        default: 'android-4.19-stable'
         required: true
       BUILD_TARGET:
         description: 'Build target'
@@ -93,6 +93,8 @@ jobs:
         export LTO="${{ github.event.inputs.LTO }}"
         export BINARY_WORKAROUND="${{ github.event.inputs.TARGET_BINARY }}"
         export SILENT="${{ github.event.inputs.SILENT_BUILD }}"
+        export LLVM=1
+        export LLVM_IAS=1
 
         # clone mtk connectivity
         rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
