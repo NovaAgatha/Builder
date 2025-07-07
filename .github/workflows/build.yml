@@ -68,10 +68,11 @@ jobs:
       run: |
         mkdir toolchains
         cd toolchains
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s gcc-10
+        curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s arm-gnu
         mkdir clang && cd clang
-        #URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz"
-        URL="https://github.com/ZyCromerZ/Clang/releases/download/21.0.0git-20250314-release/Clang-21.0.0git-20250314.tar.gz"
-        echo "[+] Fetching ZyClang 21 ..."
+        URL="https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/0998f421320ae02fddabec8a78b91bf7620159f6/clang-r563880.tar.gz"
+        echo "[+] Fetching Clang 21 ..."
         wget -q -O clang.tar.gz $URL
         tar -xf clang.tar.gz && rm clang.tar.gz && cd ..
       working-directory: kernel_root
@@ -80,11 +81,12 @@ jobs:
       id: buildKernel
       run: |
         export PATH=$(pwd)/toolchains/clang/bin:$PATH
-        #export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
-        export CROSS_COMPILE="aarch64-linux-gnu-"
+        export CROSS_COMPILE=$(pwd)/toolchains/gcc-10/bin/aarch64-buildroot-linux-gnu-
         export CLANG_TRIPLE="aarch64-linux-gnu-"
+        export CROSS_COMPILE_COMPAT="$(pwd)/toolchains/arm-gnu/bin/arm-linux-gnueabi-"
+        export CROSS_COMPILE_ARM32="$CROSS_COMPILE_COMPAT"
         export KBUILD_BUILD_USER="rsuntk"
-        export KBUILD_BUILD_HOST="rsuntkOrgs"
+        export KBUILD_BUILD_HOST="nobody"
         export BUILD_START=`date`
         export SELINUX_STATE="Enforcing"
         export IS_CI=true
@@ -93,7 +95,7 @@ jobs:
         export SILENT="${{ github.event.inputs.SILENT_BUILD }}"
 
         # clone mtk connectivity
-        #rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
+        rm -rf drivers/misc/mediatek/connectivity && cd drivers/misc/mediatek/ && git clone https://github.com/rsuntkOrgs/mtk_connectivity_module --depth=1 -b staging-4.19 connectivity && rm -rf connectivity/.git && cd ../../..
 
         if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a03s" ]]; then
           export DEFCONFIG="rsuntk-a03s_defconfig"
