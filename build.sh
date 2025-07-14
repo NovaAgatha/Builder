@@ -1,8 +1,14 @@
-export PATH="$HOME/clang/bin:$PATH"
-export LD_LIBRARY_PATH="$HOME/clang/lib"
+#
+# build script for X01BD/X00TD
+#
+# this script doesn't handle required dependencies, so
+# install it first before using this script.
+#
+
 SECONDS=0
 ZIPNAME="rsuntk_Ratibor-$(date '+%Y%m%d-%H%M').zip"
 
+# Handle: cp $(pwd)/rsuntk-X01BD_defconfig arch/arm64/configs
 [ $USE_PERSONAL_DEFCONFIG = "true" ] && DEFCONFIG="rsuntk-X01BD_defconfig" || DEFCONFIG="asus/X01BD_defconfig"
 
 if test -z "$(git rev-parse --show-cdup 2>/dev/null)" &&
@@ -24,15 +30,15 @@ fi
 USER="rsuntk"
 HOSTNAME="nobody"
 
+export PATH="$HOME/clang/bin:$PATH"
+export LD_LIBRARY_PATH="$HOME/clang/lib"
 export BUILD_USERNAME=$USER
 export BUILD_HOSTNAME=$HOSTNAME
 export KBUILD_BUILD_USER=$USER
 export KBUILD_BUILD_HOST=$HOSTNAME
-
 export CROSS_COMPILE="$HOME/androidcc-4.9/bin/aarch64-linux-android-"
 export CROSS_COMPILE_ARM32="$HOME/arm-gnu/bin/arm-linux-gnueabi-"
 export CROSS_COMPILE_COMPAT=$CROSS_COMPILE_ARM32
-
 export LLVM=1
 export LLVM_IAS=1
 
@@ -75,6 +81,7 @@ echo -e "\nKernel compiled succesfully! Zipping up...\n"
 git clone -q https://github.com/rsuntk/AnyKernel3 --single-branch
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
 cd AnyKernel3
+# TODO: Add X00TD support
 sed -i "s/BLOCK=.*/BLOCK=\/dev\/block\/bootdevice\/by-name\/boot;/" "anykernel.sh"
 zip -r9 "../$ZIPNAME" * -x '*.git*' README.md *placeholder
 cd ..
@@ -83,6 +90,8 @@ rm -rf AnyKernel3 out/arch/arm64/boot
 fi
 echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
 echo "Zip: $ZIPNAME"
+exit 0
 else
 echo -e "\nCompilation failed!"
+exit 1
 fi
