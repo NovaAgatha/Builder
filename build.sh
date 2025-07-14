@@ -18,7 +18,7 @@ fi
 
 if ! [ -d "$HOME/zyc-clang" ]; then
 echo "- Toolchains not found! Fetching..."
-aria2c https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz
+aria2c https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/0998f421320ae02fddabec8a78b91bf7620159f6/clang-r563880.tar.gz
 mkdir ~/clang
 tar -xf *.tar.gz -C ~/clang
 [ ! -d "$HOME/androidcc-4.9" ] && curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
