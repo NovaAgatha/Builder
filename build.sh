@@ -69,7 +69,7 @@ make $(echo $BUILD_FLAGS) $DEFCONFIG
 cp out/.config arch/arm64/configs/$DEFCONFIG
 rm -rf out
 echo -e "\nRegened defconfig succesfully!"
-exit
+exit 0
 fi
 
 if [[ $1 = "-c" || $1 = "--clean" ]]; then
@@ -85,11 +85,9 @@ make -j$(nproc --all) $(echo $BUILD_FLAGS) Image.gz-dtb
 
 if [ -f "out/arch/arm64/boot/Image.gz-dtb" ]; then
 echo -e "\nINFO: Kernel compiled succesfully! Zipping up...\n"
-git clone -q https://github.com/rsuntk/AnyKernel3 --single-branch
+git clone -q https://github.com/rsuntk/AnyKernel3 --single-branch -b $DEVICE_TARGET
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
 cd AnyKernel3
-# TODO: Add X00TD support
-sed -i "s/BLOCK=.*/BLOCK=\/dev\/block\/bootdevice\/by-name\/boot;/" "anykernel.sh"
 zip -r9 "../$ZIPNAME" * -x '*.git*' README.md *placeholder
 cd ..
 if [ "$DO_CLEAN" = "true" ]; then 
