@@ -70,7 +70,7 @@ jobs:
         else
           export USE_PERSONAL_DEFCONFIG=false
         fi
-        export DEVICE_TARGET = "${{ github.event.inputs.DEVICE_TARGET }}"
+        export DEVICE_TARGET="${{ github.event.inputs.DEVICE_TARGET }}"
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
           curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s ${{ github.event.inputs.KSU_BRANCH }}
         fi
