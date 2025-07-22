@@ -8,8 +8,15 @@
 SECONDS=0
 ZIPNAME="rsuntk_Ratibor-$(date '+%Y%m%d-%H%M').zip"
 
+if [ -z $DEVICE_TARGET ]; then
+	echo "Error: DEVICE_TARGET cannot empty!"
+	exit 1;
+fi
+
+echo "INFO: Device target to build: $DEVICE_TARGET"
+
 # Handle: cp $(pwd)/rsuntk-X01BD_defconfig arch/arm64/configs
-[ $USE_PERSONAL_DEFCONFIG = "true" ] && DEFCONFIG="rsuntk-X01BD_defconfig" || DEFCONFIG="asus/X01BD_defconfig"
+[ $USE_PERSONAL_DEFCONFIG = "true" ] && DEFCONFIG="rsuntk-$(echo $DEVICE_TARGET)_defconfig" || DEFCONFIG="asus/$(echo $DEVICE_TARGET)_defconfig"
 
 if test -z "$(git rev-parse --show-cdup 2>/dev/null)" &&
    head=$(git rev-parse --verify HEAD 2>/dev/null); then
@@ -17,7 +24,7 @@ if test -z "$(git rev-parse --show-cdup 2>/dev/null)" &&
 fi
 
 if ! [ -d "$HOME/zyc-clang" ]; then
-echo "- Toolchains not found! Fetching..."
+echo "INFO Toolchains not found! Fetching..."
 aria2c https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/20052113d2a5552cfff78ac7b21fd7953cc1c592/clang-r563880.tar.gz 2>/dev/null
 mkdir ~/clang
 tar -xf *.tar.gz -C ~/clang
@@ -77,7 +84,7 @@ echo -e "\nStarting compilation...\n"
 make -j$(nproc --all) $(echo $BUILD_FLAGS) Image.gz-dtb
 
 if [ -f "out/arch/arm64/boot/Image.gz-dtb" ]; then
-echo -e "\nKernel compiled succesfully! Zipping up...\n"
+echo -e "\nINFO: Kernel compiled succesfully! Zipping up...\n"
 git clone -q https://github.com/rsuntk/AnyKernel3 --single-branch
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
 cd AnyKernel3
@@ -89,9 +96,9 @@ if [ "$DO_CLEAN" = "true" ]; then
 rm -rf AnyKernel3 out/arch/arm64/boot
 fi
 echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
-echo "Zip: $ZIPNAME"
+echo "INFO: Output Zip: $ZIPNAME"
 exit 0
 else
-echo -e "\nCompilation failed!"
+echo -e "\nERROR: Compilation failed!"
 exit 1
 fi

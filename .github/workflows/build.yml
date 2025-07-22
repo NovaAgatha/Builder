@@ -8,8 +8,16 @@ on:
         required: true
       BRANCH:
         description: Kernel branch
-        default: 'faust-bka'
+        default: 'faust-bpf'
         required: true
+      DEVICE_TARGET:
+        description: Device to build
+        default: 'X01BD'
+        required: true
+        type: choice
+        options:
+          - X01BD
+          - X00TD
       KSU:
         description: Add KernelSU support
         type: boolean
@@ -62,6 +70,7 @@ jobs:
         else
           export USE_PERSONAL_DEFCONFIG=false
         fi
+        export DEVICE_TARGET = "${{ github.event.inputs.DEVICE_TARGET }}"
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
           curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s ${{ github.event.inputs.KSU_BRANCH }}
         fi
