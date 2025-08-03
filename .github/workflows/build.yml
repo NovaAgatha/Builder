@@ -61,6 +61,12 @@ jobs:
         sudo rm /etc/localtime
         sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
       
+    - name: Copy build script
+      run: |
+        git clone https://github.com/rsuntk/${GITHUB_REPOSITORY#*/} ~/tmp_repo --single-branch -b m12_a12s --depth=1
+        mv ~/tmp_repo/prebuilt .
+      working_directory: kernel_root
+    
     - name: Build kernel
       id: buildKernel
       run: |
