@@ -65,7 +65,7 @@ jobs:
       run: |
         git clone https://github.com/rsuntk/${GITHUB_REPOSITORY#*/} ~/tmp_repo --single-branch -b m12_a12s --depth=1
         mv ~/tmp_repo/prebuilt .
-      working_directory: kernel_root
+      working-directory: kernel_root
     
     - name: Build kernel
       id: buildKernel
