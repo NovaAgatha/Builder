@@ -4,11 +4,11 @@ on:
     inputs:
       REPO:
         description: Kernel Repo
-        default: 'rsuntk/android_kernel_asus_sdm660-4.19'
+        default: 'rsuntk/upstream_asus_sdm660'
         required: true
       BRANCH:
         description: Kernel branch
-        default: 'faust-bpf'
+        default: 'Faust-BKA'
         required: true
       DEVICE_TARGET:
         description: Device to build
