@@ -35,7 +35,7 @@ rm -rf *.tar.gz
 fi
 
 USER="rsuntk"
-HOSTNAME="nobody"
+HOSTNAME="himself"
 
 export PATH="$HOME/clang/bin:$PATH"
 export LD_LIBRARY_PATH="$HOME/clang/lib"
