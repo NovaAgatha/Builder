@@ -4,11 +4,11 @@ on:
     inputs:
       REPO:
         description: Kernel Repo
-        default: 'rsuntk/upstream_asus_sdm660'
+        default: 'rsuntk-playground/upstream_asus_sdm660'
         required: true
       BRANCH:
         description: Kernel branch
-        default: 'Faust-BKA'
+        default: 'master'
         required: true
       DEVICE_TARGET:
         description: Device to build
@@ -35,17 +35,19 @@ jobs:
     runs-on: ubuntu-latest
     environment: secureEnvironment
     steps:
-    - name: Get date
+    - name: Get date & fix date
       id: rundate
       run: sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && echo "REPO_DATE=`date`" >> $GITHUB_OUTPUT
     
     - uses: actions/checkout@v4
       with:
-        path: kernel_root
-        repository: ${{ github.event.inputs.REPO }}
-        ref: ${{ github.event.inputs.BRANCH }}
+        path: rootdir
         show-progress: false
         fetch-depth: 1
+
+    - name: Clone kernel source
+      run: git clone --depth=1 --single-branch -b ${{ github.event.inputs.BRANCH }} ${{ github.event.inputs.REPO }} kernel_root
+      working-directory: rootdir
 
     - name: Prepare dependencies
       run: |
@@ -57,14 +59,14 @@ jobs:
       id: buildKernel
       run: |
         export IS_CI=true
-        git clone https://github.com/rsuntk/${GITHUB_REPOSITORY#*/} ~/tmp_repo --single-branch -b asus_sdm660
-        mv ~/tmp_repo/build.sh . && mv ~/tmp_repo/rsuntk-${{ github.event.inputs.DEVICE_TARGET }}_defconfig ./arch/arm64/configs/
+        mv rsuntk-${{ github.event.inputs.DEVICE_TARGET }}_defconfig $(pwd)/kernel_root/arch/arm64/configs/
         gitsha1=$(git rev-parse --short HEAD)
         buildDetails="`make kernelversion`-Ratibor-${{ github.event.inputs.DEVICE_TARGET }}_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
-      working-directory: kernel_root
+      working-directory: rootdir
 
     - name: Build kernel
       run: |
+        cd kernel_root
         if [[ "${{ github.event.inputs.USE_PERSONAL }}" = "true" ]]; then
           export USE_PERSONAL_DEFCONFIG=true
         else
@@ -81,20 +83,20 @@ jobs:
         if [ -e $(pwd)/out/arch/arm64/boot/Image ]; then
           rm $(pwd)/out/arch/arm64/boot/Image
         fi
-      working-directory: kernel_root
+      working-directory: rootdir
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Build-${{ steps.buildKernel.outputs.buildDetails }}
-        path: kernel_root/out/arch/arm64/boot/*
+        path: rootdir/kernel_root/out/arch/arm64/boot/*
         compression-level: 9
 
     - name: Upload AnyKernel3
       uses: actions/upload-artifact@v4
       with:
         name: AnyKernel3-${{ steps.buildKernel.outputs.buildDetails }}
-        path: kernel_root/AnyKernel3/*
+        path: rootdir/kernel_root/AnyKernel3/*
         compression-level: 9
 
     - name: Upload configs complete
@@ -102,10 +104,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Defconfig-${{ steps.buildKernel.outputs.buildDetails }}
-        path: kernel_root/out/defconfig
+        path: rootdir/kernel_root/out/defconfig
 
     - name: Cleanup useless files
       continue-on-error: true
       run: |
         rm out/vmlinux.o out/vmlinux out/System.map
-      working-directory: kernel_root
+      working-directory: rootdir/kernel_root
