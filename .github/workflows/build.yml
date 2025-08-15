@@ -46,7 +46,7 @@ jobs:
         fetch-depth: 1
 
     - name: Clone kernel source
-      run: git clone --depth=1 --single-branch -b ${{ github.event.inputs.BRANCH }} ${{ github.event.inputs.REPO }} kernel_root
+      run: git clone --depth=1 --single-branch -b ${{ github.event.inputs.BRANCH }} https://github.com/${{ github.event.inputs.REPO }} kernel_root
       working-directory: rootdir
 
     - name: Prepare dependencies
