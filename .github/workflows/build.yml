@@ -76,7 +76,7 @@ jobs:
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
           curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s ${{ github.event.inputs.KSU_BRANCH }}
         fi
-        bash ./build.sh
+        bash ../build.sh
         if [ -e $(pwd)/out/.config ]; then
           mv out/.config out/defconfig
         fi
