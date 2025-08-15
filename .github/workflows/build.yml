@@ -59,7 +59,7 @@ jobs:
       id: buildKernel
       run: |
         cd kernel_root && export IS_CI=true
-        mv rsuntk-${{ github.event.inputs.DEVICE_TARGET }}_defconfig $(pwd)/kernel_root/arch/arm64/configs/
+        mv ../rsuntk-${{ github.event.inputs.DEVICE_TARGET }}_defconfig arch/arm64/configs/
         gitsha1=$(git rev-parse --short HEAD)
         buildDetails="`make kernelversion`-Ratibor-${{ github.event.inputs.DEVICE_TARGET }}_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
       working-directory: rootdir
