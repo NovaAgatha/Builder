@@ -75,6 +75,10 @@ jobs:
         export DEVICE_TARGET="${{ github.event.inputs.DEVICE_TARGET }}"
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
           curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s ${{ github.event.inputs.KSU_BRANCH }}
+          # fix -dirty
+          git config --global user.name "rsuntk"
+          git config --global user.email "me@rsuntk.net"
+          git add . && git commit -sm "fix dirty"
         fi
         bash ../build.sh
         if [ -e $(pwd)/out/.config ]; then
