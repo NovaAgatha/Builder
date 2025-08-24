@@ -4,7 +4,7 @@ on:
     inputs:
       REPO:
         description: Kernel Repo
-        default: 'rsuntk-playground/upstream_asus_sdm660'
+        default: 'rsuntk-playground/android_kernel_asus_sdm660'
         required: true
       BRANCH:
         description: Kernel branch
@@ -72,6 +72,8 @@ jobs:
         else
           export USE_PERSONAL_DEFCONFIG=false
         fi
+        # Clang 22 workaround
+        export KCFLAGS=-w
         export DEVICE_TARGET="${{ github.event.inputs.DEVICE_TARGET }}"
         if [[ "${{ github.event.inputs.KSU }}" = "true" ]]; then
           curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s ${{ github.event.inputs.KSU_BRANCH }}
