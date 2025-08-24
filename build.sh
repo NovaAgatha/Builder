@@ -23,29 +23,42 @@ if test -z "$(git rev-parse --show-cdup 2>/dev/null)" &&
 	ZIPNAME="${ZIPNAME::-4}-$(echo $head | cut -c1-8).zip"
 fi
 
-if ! [ -d "$HOME/zyc-clang" ]; then
-echo "INFO Toolchains not found! Fetching..."
-aria2c https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/20052113d2a5552cfff78ac7b21fd7953cc1c592/clang-r563880.tar.gz 2>/dev/null
-mkdir ~/clang
-tar -xf *.tar.gz -C ~/clang
-[ ! -d "$HOME/androidcc-4.9" ] && curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
-[ ! -d "$HOME/arm-gnu" ] && curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s arm-gnu
-mv androidcc-4.9 ~/androidcc-4.9 && mv arm-gnu ~/arm-gnu
-rm -rf *.tar.gz
+#if ! [ -d "$HOME/clang" ]; then
+#echo "INFO Toolchains not found! Fetching..."
+#aria2c https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/20052113d2a5552cfff78ac7b21fd7953cc1c592/clang-r563880.tar.gz 2>/dev/null
+#mkdir ~/clang
+#tar -xf *.tar.gz -C ~/clang
+#[ ! -d "$HOME/androidcc-4.9" ] && curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
+#[ ! -d "$HOME/arm-gnu" ] && curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s arm-gnu
+#mv androidcc-4.9 ~/androidcc-4.9 && mv arm-gnu ~/arm-gnu
+#rm -rf *.tar.gz
+#export PATH="$HOME/clang/bin:$PATH"
+#export LD_LIBRARY_PATH="$HOME/clang/lib"
+#export CROSS_COMPILE="$HOME/androidcc-4.9/bin/aarch64-linux-android-"
+#export CROSS_COMPILE_ARM32="$HOME/arm-gnu/bin/arm-linux-gnueabi-"
+#fi
+
+if [ ! -d "$HOME/zyc-clang" ]; then
+echo "INFO: Toolchains not found! Fetching ..."
+aria2c https://github.com/ZyCromerZ/Clang/releases/download/22.0.0git-20250805-release/Clang-22.0.0git-20250805.tar.gz
+mkdir ~/zyc-clang
+tar -xf *.tar.gz -C ~/zyc-clang
+rm *.tar.gz
+export PATH="$HOME/zyc-clang/bin:$PATH"
+export LD_LIBRARY_PATH="$HOME/zyc-clang/lib"
+export CROSS_COMPILE="aarch64-linux-gnu-"
+export CROSS_COMPILE_ARM32="arm-linux-gnueabi-"
 fi
 
-USER="rsuntk"
-HOSTNAME="himself"
+USER="AttentionSeekr"
+HOSTNAME="yukiprjkt"
 
-export PATH="$HOME/clang/bin:$PATH"
-export LD_LIBRARY_PATH="$HOME/clang/lib"
 export BUILD_USERNAME=$USER
 export BUILD_HOSTNAME=$HOSTNAME
 export KBUILD_BUILD_USER=$USER
 export KBUILD_BUILD_HOST=$HOSTNAME
-export CROSS_COMPILE="$HOME/androidcc-4.9/bin/aarch64-linux-android-"
-export CROSS_COMPILE_ARM32="$HOME/arm-gnu/bin/arm-linux-gnueabi-"
 export CROSS_COMPILE_COMPAT=$CROSS_COMPILE_ARM32
+export CLANG_TRIPLE=aarch64-linux-gnu-
 export LLVM=1
 export LLVM_IAS=1
 
