@@ -137,7 +137,7 @@ jobs:
         else
         	SELINUX_STATE="Enforcing"
         fi
-        if [[ "${{github.event.inputs.MISC.OPT.OVERCLOCK}}" = "true" ]]; then
+        if [[ "${{ github.event.inputs.MISC_OPT_OVERCLOCK }}" = "true" ]]; then
           echo "CONFIG_MISC_OPT_OVERCLOCK=y" >>  arch/arm64/configs/$DEFCONFIG
         fi
 
