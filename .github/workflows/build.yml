@@ -30,6 +30,9 @@ on:
       KSU:
         description: Add KernelSU support
         type: boolean
+      MISC_OPT_OVERCLOCK:
+        description: Overclock GPU to 900Mhz
+        type: boolean
       UPLOAD_TO_TG:
         description: Upload to Telegram
         type: boolean
@@ -79,7 +82,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: kernel_root
-        repository: "rsuntkOrgs/kernel_samsung_wingtech"
+        repository: "NovaAgatha/kernel_samsung_wingtech"
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
@@ -133,6 +136,9 @@ jobs:
         	echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
         else
         	SELINUX_STATE="Enforcing"
+        fi
+        if [[ "${{github.event.inputs.MISC.OPT.OVERCLOCK}}" = "true" ]]; then
+          echo "CONFIG_MISC_OPT_OVERCLOCK=y" >>  arch/arm64/configs/$DEFCONFIG
         fi
 
         # clone mtk connectivity
